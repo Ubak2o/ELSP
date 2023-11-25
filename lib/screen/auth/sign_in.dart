@@ -1,7 +1,11 @@
 import 'package:capstone/screen/auth/reset_password.dart';
 import 'package:capstone/screen/auth/sign_up.dart';
-import 'package:capstone/screen/myhome.dart';
+import 'package:capstone/screen/features/myhome.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';  // jsonEncode를 사용하기 위해 추가
+
 
 //로그인 페이지
 class LoginPage extends StatefulWidget {
@@ -10,6 +14,101 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
+
+  TextEditingController nameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+  }
+
+  Future<String?> loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
+  void loginUser() {
+    if (nameController.text.isEmpty || passwordController.text.isEmpty) {
+      // 경고 창 표시
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('경고'),
+            content: Text('이름과 비밀번호를 입력해주세요.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  nameController.clear();
+                  passwordController.clear();
+                  Navigator.of(context).pop();
+                },
+                child: Text('확인'),
+              ),
+            ],
+          );
+        },
+      );
+      return; // 함수 종료
+    }
+
+    final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/token/');
+    final Map<String, dynamic> userData = {
+      'username': nameController.text,
+      'password': passwordController.text,
+    };
+
+    http.post(
+      apiUrl,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(userData),
+    ).then((http.Response response) {
+      if (response.statusCode == 200) {
+        // 로그인 성공
+        print('Login successful');
+
+      // 서버 응답에서 토큰 추출
+        final token = json.decode(response.body)['access'];
+        //print('Token: $token');
+
+      // 여기에서 적절한 화면 전환 또는 처리를 수행할 수 있습니다.
+        nameController.clear();
+        passwordController.clear();
+        saveToken(token);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
+      
+      }else if (response.statusCode == 401) {
+        // 사용자 정보가 없는 경우
+        // 경고 창 표시
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('경고'),
+              content: Text('사용자 정보가 없습니다.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    nameController.clear();
+                    passwordController.clear();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('확인'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // 로그인 실패
+        print('Failed to login. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    }); 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +195,7 @@ class _LoginPage extends State<LoginPage> {
                           
                           //이메일 입력
                           TextField(
+                            controller: nameController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
@@ -103,9 +203,9 @@ class _LoginPage extends State<LoginPage> {
                               ),
                               filled: true,
                               fillColor: Color(0xFFe7edeb),
-                              hintText: 'E-mail',
+                              hintText: 'Name',
                               prefixIcon: Icon(
-                                Icons.email,
+                                Icons.account_circle,
                                 color: Colors.grey[600],
                               ),
                             ),
@@ -117,6 +217,7 @@ class _LoginPage extends State<LoginPage> {
                           
                           //비밀 번호 입력
                           TextField(
+                            controller: passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
@@ -142,11 +243,9 @@ class _LoginPage extends State<LoginPage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: (){
-                                Navigator.push(context,
-                                  MaterialPageRoute(builder: (c){
-                                    //일단 바로 MyHome으로 가게 해뒀음. 원래는 로그인이 완료되고 이동 가능해야함 !!
-                                  return MyHome();
-                                }));
+                                loginUser();
+                                //print(nameController.text);
+                                //print(passwordController.text);       
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color.fromARGB(255, 175, 221, 238)),

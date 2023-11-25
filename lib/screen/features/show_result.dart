@@ -1,5 +1,5 @@
 import 'package:flutter_swiper_null_safety_flutter3/flutter_swiper_null_safety_flutter3.dart';
-import 'package:capstone/screen/myhome.dart';
+import 'package:capstone/screen/features/myhome.dart';
 import 'package:capstone/model/model_quiz.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -75,8 +75,8 @@ class _ShowResult extends State<ShowResult>{
                   return checkText1(widget.inputValue, widget.quiz, width, height);
                 }else{}
                   return checkText2(widget.inputValue, widget.quiz, width, height);
-            })
-            
+              }
+            )
           )
         ), 
         
@@ -121,15 +121,15 @@ class _ShowResult extends State<ShowResult>{
               ),
             ),
 
-            SizedBox(height: 8),
+            SizedBox(height: 30),
 
             // 자신의 답변 출력 
             Container(
-              width: width * 0.8,
-              height: height * 0.2,
+              width: width * 0.75,
+              height: height * 0.17,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(10),
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
@@ -155,11 +155,11 @@ class _ShowResult extends State<ShowResult>{
 
             // 교정된 답변 출력
             Container(
-              width: width * 0.8,
-              height: height * 0.2,
+              width: width * 0.75,
+              height: height * 0.17,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(10),
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
@@ -183,7 +183,7 @@ class _ShowResult extends State<ShowResult>{
                 )
             ),
             
-            SizedBox(height: 20),
+            SizedBox(height: 30),
 
             //버튼
             ButtonBar(
@@ -221,7 +221,7 @@ class _ShowResult extends State<ShowResult>{
               child: ElevatedButton.icon(
                 onPressed: () {},  
                 icon: Icon(Icons.spellcheck, color: Colors.black), 
-                label: Text("내용 보충하기", style: TextStyle(fontWeight: FontWeight.bold),),
+                label: Text("결과 확인하기", style: TextStyle(fontWeight: FontWeight.bold),),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(width * 0.8, height * 0.07), // 가로 길이를 조절합니다.
                   foregroundColor: Colors.black,
@@ -230,98 +230,7 @@ class _ShowResult extends State<ShowResult>{
               ),
             ),
 
-            SizedBox(height: 8),
-
-          //사용자 입력(보충 내용)
-           Container(
-              width: width * 0.8, 
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.white, width: 1.5),
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 1,
-                        blurRadius: 10,
-                        offset: Offset(0, 1),
-                      ),
-                    ],    
-                  ),
-              child: TextFormField(
-                controller: textController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: '질문에 대한 내용을 보충해보세요',
-                  suffixIcon: IconButton(
-                  icon: Icon(Icons.cancel, color: Color.fromARGB(255, 133, 129, 129)),
-                  onPressed: () {textController.clear();},
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(width: 1.5, color: Color.fromARGB(255, 240, 251, 249)),
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(width: 1.5, color: const Color.fromARGB(255, 186, 186, 186)),
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                  ),
-                ),
-                maxLines: 4,
-              ),
-            ),
-            
-            SizedBox(height: 10),
-            
-            //제출하기 버튼
-            ButtonBar(children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    inputText= textController.text;
-                    print('input : $inputText');
-                  });
-                },
-                icon: Icon(Icons.check, color: Color.fromARGB(255, 20, 137, 46)), 
-                label: Text("제출하기", style: TextStyle(fontWeight: FontWeight.bold),), 
-                style : ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Color.fromARGB(255, 175, 229, 238),
-                ),
-              ),
-            ],), 
-            
-            SizedBox(height: 10),
-
-            //교정된 답변 출력
-            Container(
-              width: width * 0.8,
-              height: height * 0.18,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 1,
-                    blurRadius: 10,
-                    offset: Offset(0, 1), // changes position of shadow
-                  ),
-                ],
-              ),
-              padding: EdgeInsets.only(top: width * 0.012),
-              child: AutoSizeText ( 
-                //' $inputText가 수정되어야함!!',
-                ' ',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: width * 0.03,
-                ),
-                )
-            ),
-            
-            SizedBox(height: 20),
+            SizedBox(height : 330),
 
             //버튼
             ButtonBar(
@@ -343,10 +252,10 @@ class _ShowResult extends State<ShowResult>{
 
                 ElevatedButton(
                   onPressed: () { 
-                    /*Navigator.push(context,
+                    Navigator.push(context,
                       MaterialPageRoute(builder: (c){
                       return MyHome();
-                    })); */},
+                    })); },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),),
                   child: Text('종료', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),

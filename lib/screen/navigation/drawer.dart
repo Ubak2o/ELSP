@@ -1,11 +1,45 @@
-import 'package:capstone/screen/myhome.dart';
 import 'package:flutter/material.dart';
+import 'package:capstone/screen/features/myhome.dart';
+import 'package:capstone/screen/features/survey.dart';
+import 'package:capstone/func/auth_manager.dart';
 
-class MyDrawer extends StatelessWidget {
-  const MyDrawer({super.key});
+/*
+* 파일: bottom.dart
+* 작성자: 오예진
+* 최초 작성일: 2023-09-25
+* 설명: 사용자 인터페이스 옆에서 나오는 패널 생성.
+*/
+
+class MyDrawer extends StatefulWidget {
+  @override
+  MyDrawerState createState() => MyDrawerState();
+}
+
+class MyDrawerState extends State<MyDrawer> {
+
+  AuthManager authManager = AuthManager();
+  String userName = "";
+  String userEmail = "";
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserInfo();
+  }
+
+  Future<void> loadUserInfo() async {
+    // await를 사용하여 비동기 함수 기다리기
+    await authManager.loadUserInfo(); 
+    // setState 메서드를 사용해서 loadUserInfo 함수가 완료된 후에 build 메서드에서 UI를 업데이트
+    setState(() {
+      userName = authManager.fetchedUserName;
+      userEmail = authManager.fetchedUserEmail;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Drawer(
       backgroundColor: Colors.white,
       child: Column(
@@ -17,8 +51,9 @@ class MyDrawer extends StatelessWidget {
                 builder: (_) => MyHome(),
               ),
             ),
-            child: buildHeader(),
+            child: buildHeader(context, userName, userEmail),
           ),
+
           Padding(
             padding: const EdgeInsets.symmetric(
               vertical: 20,
@@ -31,8 +66,9 @@ class MyDrawer extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () {
-
-                        
+                        Navigator.push(context, MaterialPageRoute(builder: (c) {
+                          return UserSurvey();
+                        }));
                        },
                       icon: Icon(Icons.checklist),
                       tooltip: 'Survey',
@@ -45,7 +81,9 @@ class MyDrawer extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                       
+                      },
                       icon: Icon(Icons.settings),
                       tooltip: 'Settings',
                     ),
@@ -53,12 +91,15 @@ class MyDrawer extends StatelessWidget {
                     Text('Settings'),
                   ],
                 ),
+                
                 const Divider( height: 50, color: Colors.black, thickness: 1,),
                 
                  Row(
                   children: [
                     IconButton(
-                      onPressed: () { },
+                      onPressed: () { 
+                        authManager.logout(context);
+                      },
                       icon: Icon(Icons.logout),
                       tooltip: 'Log out',
                     ),
@@ -75,7 +116,8 @@ class MyDrawer extends StatelessWidget {
   }
 }
 
-Widget buildHeader() =>GestureDetector(
+Widget buildHeader(BuildContext context, String userName, String userEmail) => GestureDetector(
+
       child: Container(
         decoration: BoxDecoration(
           color: Color.fromARGB(255, 175, 221, 238),
@@ -83,12 +125,14 @@ Widget buildHeader() =>GestureDetector(
             bottomRight: Radius.circular(40.0),
           ),
         ),
+        
         child: Container(
           padding: const EdgeInsets.only(
             top: 40,
             bottom: 20,
           ),
-          child: const Column(
+          
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CircleAvatar(
@@ -96,22 +140,25 @@ Widget buildHeader() =>GestureDetector(
                 backgroundColor: Color.fromARGB(255, 175, 221, 238),
                 backgroundImage: AssetImage('user.png'),
               ),
+              
               SizedBox(height: 15),
+              
               Text(
-                'User Name',
+                userName,
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              
               SizedBox(height: 5),
+              
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  //Icon(Icons.email_outlined, color: Colors.black),
                   Text(
-                    ' user email',
+                    userEmail,
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
