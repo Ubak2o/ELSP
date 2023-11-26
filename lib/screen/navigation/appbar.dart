@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 
 /*
 * 파일: bottom.dart
-* 작성자: 오예진
 * 최초 작성일: 2023-09-25
-* 설명: 상단바를 생성합니다.
+* 설명: 상단바 생성.
 */
 
 AppBar buildAppBar(BuildContext context) {

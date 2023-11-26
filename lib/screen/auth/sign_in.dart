@@ -6,8 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';  // jsonEncode를 사용하기 위해 추가
 
+/*
+* 파일: sign_in.dart
+* 최초 작성일: 2023-10-15
+* 설명: 로그인 페이지
+*/
 
-//로그인 페이지
+
 class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPage();

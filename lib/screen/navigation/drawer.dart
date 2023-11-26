@@ -1,11 +1,12 @@
+import 'package:capstone/screen/auth/sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/features/myhome.dart';
-import 'package:capstone/screen/features/survey.dart';
+import 'package:capstone/screen/features/survey_topic_select.dart';
+import 'package:capstone/screen/features/impromptu_topic_select.dart';
 import 'package:capstone/func/auth_manager.dart';
 
 /*
 * 파일: bottom.dart
-* 작성자: 오예진
 * 최초 작성일: 2023-09-25
 * 설명: 사용자 인터페이스 옆에서 나오는 패널 생성.
 */
@@ -67,14 +68,14 @@ class MyDrawerState extends State<MyDrawer> {
                     IconButton(
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (c) {
-                          return UserSurvey();
+                          return SurveyTopicSelect();
                         }));
                        },
                       icon: Icon(Icons.checklist),
-                      tooltip: 'Survey',
+                      //tooltip: '',
                     ),
                     SizedBox(width: 10,),
-                    Text('Background Survey'),
+                    Text('주제선택(선택질문)'),
                   ],
                 ),
                 
@@ -82,13 +83,15 @@ class MyDrawerState extends State<MyDrawer> {
                   children: [
                     IconButton(
                       onPressed: () {
-                       
+                        Navigator.push(context, MaterialPageRoute(builder: (c) {
+                          return ImpromptuTopicSelect();
+                        }));        
                       },
-                      icon: Icon(Icons.settings),
-                      tooltip: 'Settings',
+                      icon: Icon(Icons.checklist),
+                      //tooltip: 'Settings',
                     ),
                     SizedBox(width: 10,),
-                    Text('Settings'),
+                    Text('주제선택(돌발질문)'),
                   ],
                 ),
                 
@@ -101,10 +104,69 @@ class MyDrawerState extends State<MyDrawer> {
                         authManager.logout(context);
                       },
                       icon: Icon(Icons.logout),
-                      tooltip: 'Log out',
+                      tooltip: '로그아웃',
                     ),
                     SizedBox(width: 10,),
-                    Text('Log out'),
+                    Text('로그아웃'),
+                  ],
+                ),
+
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("알림"),
+                              content: Text("정말로 탈퇴하시겠습니까?"),
+                              
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    
+                                    authManager.deleteUser(context).then((int statusCode) {
+                                      Navigator.push(context, MaterialPageRoute(builder: (c){
+                                        return LoginPage();
+                                      }));
+
+                                      // Check the status code and show another dialog if it's 204
+                                      if (statusCode == 204) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: Text("탈퇴 완료"),
+                                              content: Text("탈퇴가 성공적으로 완료되었습니다."),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                  Navigator.of(context).pop(); // Close the success dialog
+                                                },
+                                                child: Text("확인"),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      }
+                                    }
+                                  );},
+                                  
+                                  child: Text("확인"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+
+                      },
+                      icon: Icon(Icons.delete_outline),
+                      tooltip: '탈퇴',
+                    ),
+                    SizedBox(width: 10,),
+                    Text('탈퇴'),
                   ],
                 ),
               ],

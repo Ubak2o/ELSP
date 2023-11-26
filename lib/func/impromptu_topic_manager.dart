@@ -1,15 +1,21 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class UserTopicManager{
+/*
+* 파일: impromptu_topic_manager.dart
+* 최초 작성일: 2023-11-26
+* 설명: 사용자가 선택질문에 대한 주제를 고를 때 DRF와 통신하는 함수
+*/
 
-  List<String> surveyAllTopics = [];
-  List<String> surveyUserTopics = [];
+class ImromptuTopicManager{
+
+  List<String> impromptuAllTopics = [];
+  List<String> ipromptuUserTopics = [];
   List<bool> checkboxStates = [];
 
-  //모든 선택주제의 토픽을 가져오는 함수
-  Future<void> fetchAllServeyTopic() async {
-    var getAllTopic = Uri.http('127.0.0.1:8000', '/quiz/all-survey-topics/');
+  //모든 돌발주제의 토픽을 가져오는 함수
+  Future<void> fetchAllTopic() async {
+    var getAllTopic = Uri.http('127.0.0.1:8000', '/quiz/all-impromptu-topics/');
   
     try {
       var getAllTopicResponse = await http.get(getAllTopic);
@@ -17,8 +23,7 @@ class UserTopicManager{
       //모든 서베이 토픽을 잘 가져 왔다면
       if (getAllTopicResponse.statusCode == 200) {
           List<dynamic> data = json.decode(utf8.decode(getAllTopicResponse.bodyBytes));
-          //print("in user_topic_manager's fetchAllServeyTopic  : $data");
-          surveyAllTopics = data.map((item) => item.toString()).toList();
+          impromptuAllTopics = data.map((item) => item.toString()).toList();
         } else {
           print('Failed to load data, status code: ${getAllTopicResponse.statusCode}');
         }
@@ -28,9 +33,8 @@ class UserTopicManager{
   }
 
   //유저가 선택한 선택주제의 토픽을 가져오는 함수
-  Future<void> fetchUserTopic(String token) async {
-
-    var getUserTopic = Uri.http('127.0.0.1:8000', '/quiz/user-topics-select/');
+  Future<void> fetchTopic(String token) async {
+    var getUserTopic = Uri.http('127.0.0.1:8000', '/quiz/user-impromptu-topics-select/');
   
     try {
       var getUserTopicUrlResponse = await http.get(
@@ -46,11 +50,12 @@ class UserTopicManager{
         
         for (int i = 0; i < data.length; i++) {
           String topic = data[i]['topic'];
-          surveyUserTopics.add(topic);
+          ipromptuUserTopics.add(topic);
         }
         
-        //print("in user_topic_manager's fetchUserTopic : $surveyUserTopics");
-        checkboxStates = surveyAllTopics.map((topic) => surveyUserTopics.contains(topic)).toList();
+        //print("$ipromptuUserTopics");
+        checkboxStates = impromptuAllTopics.map((topic) => ipromptuUserTopics.contains(topic)).toList();
+        //print(checkboxStates);
 
       } else {
         print('Failed to load data, status code: ${getUserTopicUrlResponse .statusCode}');
@@ -61,11 +66,11 @@ class UserTopicManager{
   }
 
   // 유저가 선택한 토픽을 데이터베이스에 저장하는 API를 호출하는 함수
-  Future<void> saveUserTopic(String selectedTopic, String userName, String token) async {
-    var url = Uri.http('127.0.0.1:8000', 'quiz/user-topic-create/');
+  Future<void> saveTopic(String selectedTopic, String userName, String token) async {
+    var url = Uri.http('127.0.0.1:8000', 'quiz/user-impromptu-topic-create/');
 
     try {
-      var response = await http.post(
+      await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $token',
@@ -74,19 +79,19 @@ class UserTopicManager{
           'user': userName,
           'topic' : selectedTopic,
         }
-      );
-      print(response.statusCode);
+      );    
+      //print(response.statusCode)
     } catch (error) {
       print('Error saving user topic $selectedTopic: $error');
     }
   }
 
   // 유저가 선택 해제한 단일 토픽을 데이터베이스에서 삭제하는 API를 호출하는 함수
-  Future<void> deleteUserTopic(String unselectedTopic, String userName, String token) async {
-    var url = Uri.http('127.0.0.1:8000', 'quiz/user-topic-delete/'); // 적절한 API 경로로 수정
+  Future<void> deleteTopic(String unselectedTopic, String userName, String token) async {
+    var url = Uri.http('127.0.0.1:8000', 'quiz/user-impromptu-topic-delete/');
 
     try {
-      var response = await http.post(
+      await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $token',
@@ -96,10 +101,8 @@ class UserTopicManager{
           'topic' : unselectedTopic,
         }
       );
-      print(response.statusCode);
     } catch (error) {
       print('Error deleting user topic $unselectedTopic: $error');
     }
   }
-
 }

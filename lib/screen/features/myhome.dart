@@ -16,12 +16,10 @@ import 'package:capstone/func/auth_manager.dart';
 
 /*
 * 파일: myhome.dart
-* 작성자: 오예진
 * 최초 작성일: 2023-09-30
 * 설명: 사용자가 질문을 듣고 녹음을 하는 화면입니다.
 
 * 수정일: 2023-11-25
-* 수정자: 오예진
 * 수정 내용: 사용자가 선택한 주제별로 질문을 재생하는 기능을 추가 
 */
 
@@ -409,23 +407,28 @@ class _UserRecord extends State<UserRecord>{
         url,
         headers: {
           'Authorization': 'Bearer $userToken',
-        },  
+        },
       ); 
 
     } else if (selectedSection == '돌발주제') {
       url = Uri.http('127.0.0.1:8000', '/quiz/impromptu/');
-      response = await http.get(url); 
+      response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $userToken',
+        },    
+      ); 
     }
 
-    print('Response body: ${response.body}');
-
-    //정상적으로 받아왔을 경우
     if (response.statusCode == 200) {
       final newQuiz = parseQuiz_(utf8.decode(response.bodyBytes));
       setState(() {
         quiz = newQuiz;
         isLoading = false;
       });
+    } else if(response.statusCode == 500){
+      showFailDialog();
+      
     } else {
       throw Exception('failed to load selected quiz');
     }
@@ -524,6 +527,26 @@ class _UserRecord extends State<UserRecord>{
       time = int.parse(selectedSecond!);
       isPlaying = false;
     });
+  }
+
+  void showFailDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('경고'),
+          content: Text('선택된 주제가 없습니다. 주제를 선택해주세요.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

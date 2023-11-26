@@ -1,9 +1,13 @@
+import 'package:capstone/func/auth_manager.dart';
 import 'package:capstone/screen/auth/sign_in.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; 
-import 'dart:convert';  // jsonEncode를 사용하기 위해 추가
 
-// 회원가입 페이지
+/*
+* 파일: sign_up.dart
+* 최초 작성일: 2023-10-15
+* 설명: 회원가입 페이지
+*/
+
 class SignupPage extends StatefulWidget {
   @override
   State<SignupPage> createState() => _SignupPage();
@@ -11,91 +15,12 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPage extends State<SignupPage> {
 
+  AuthManager authManager = AuthManager();
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
-
-  void showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('회원가입 성공'),
-          content: Text('회원가입이 성공적으로 완료되었습니다.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                nameController.clear();
-                emailController.clear();
-                passwordController.clear();
-                confirmPasswordController.clear();
-                Navigator.push(context, MaterialPageRoute(builder: (c) {
-                  return LoginPage();
-                }));
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showFailDialog() {
-    showDialog(
-       context: context,
-       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('경고'),
-          content: Text('비밀번호가 일치하지 않습니다.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                nameController.clear();
-                emailController.clear();
-                passwordController.clear();
-                confirmPasswordController.clear();
-                Navigator.of(context).pop();
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    ) ;
-  }
-
-  Future<void> register() async {
-    var apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/register/');
-
-    final Map<String, dynamic> userData = {
-      'username': nameController.text,
-      'email': emailController.text,
-      'password': passwordController.text,
-    };
-
-    final http.Response response = await http.post(
-      apiUrl,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(userData),
-    );
-
-    if (response.statusCode == 201) {
-      //회원가입 성공
-      print('Registration successful');
-      //다이얼로그 표시
-      showSuccessDialog();
-    } else {
-     // 회원가입 실패
-      print('Failed to register. Status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    }
-    return;
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +49,7 @@ class _SignupPage extends State<SignupPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                
                 // 상단 타이틀 부분
                 Expanded(
                   flex: 2,
@@ -158,6 +84,7 @@ class _SignupPage extends State<SignupPage> {
                     ),
                   ),
                 ),
+                
                 // 실제 회원가입 입력 폼 부분
                 Expanded(
                   flex: 5,
@@ -176,6 +103,7 @@ class _SignupPage extends State<SignupPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          
                           // 이름 입력
                           TextField(
                             controller: nameController,
@@ -194,6 +122,7 @@ class _SignupPage extends State<SignupPage> {
                             ),
                           ),
                           SizedBox(height: 20.0,),
+                          
                           // 이메일 입력
                           TextField(
                             controller: emailController,
@@ -211,7 +140,9 @@ class _SignupPage extends State<SignupPage> {
                               ),
                             ),
                           ),
+                          
                           SizedBox(height: 20.0,),
+                          
                           // 패스워드 입력
                           TextField(
                             controller: passwordController,
@@ -230,7 +161,9 @@ class _SignupPage extends State<SignupPage> {
                               ),
                             ),
                           ),
+                          
                           SizedBox(height: 20.0,),
+                          
                           // 패스워드 재입력
                           TextField(
                             controller : confirmPasswordController,
@@ -249,22 +182,54 @@ class _SignupPage extends State<SignupPage> {
                               ),
                             ),
                           ),
+                          
                           SizedBox(height: 30.0,),
+                          
                           // 회원가입 버튼
+                          
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
+
                                 // 비밀번호가 일치하지 않을 때, 경고 창 띄우기
                                 if (passwordController.text != confirmPasswordController.text) {
-                                  showFailDialog();
+                                  showFailDialog("비밀번호가 일치하지 않습니다.");
                                 }else{
-                                  register();
+
+                                  final Map<String, dynamic> userData = {
+                                    'username': nameController.text,
+                                    'email': emailController.text,
+                                    'password': passwordController.text,
+                                  };
+                                  
+                                  authManager.register(userData).then((result) {
+                                    // 결과를 사용하는 코드
+                                    if(result.isEmpty){
+                                      showSuccessDialog();
+                                    }else{
+                                      List<dynamic>? usernameErrors = result['username'];
+                                      List<dynamic>? emailErrors = result['email'];
+                                      
+                                      if(usernameErrors != null && emailErrors == null){
+                                        //print(usernameErrors.toString());
+                                        showFailDialog('이미 사용 중인 사용자명입니다.');
+                                      }else if(usernameErrors == null && emailErrors != null){
+                                         //print(emailErrors.toString());
+                                         showFailDialog('이메일 형식이 옳바르지 않습니다.');
+                                      }else{
+                                        //print("both");
+                                        showFailDialog('이미 사용중인 사용자명입니다. 이메일 형식이 옳바르지 않습니다');          
+                                      }
+                                    }
+                                  });
                                 }
                               },
+
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color.fromARGB(255, 175, 221, 238),
                               ),
+
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                                 child: Text(
@@ -277,7 +242,9 @@ class _SignupPage extends State<SignupPage> {
                               ),
                             ),
                           ),
+                          
                           SizedBox(height: 20.0,),
+                          
                           // 이미 계정이 있다면 로그인 버튼
                           SizedBox(
                             width: double.infinity,
@@ -314,5 +281,55 @@ class _SignupPage extends State<SignupPage> {
         ),
       ),
     );
+  }
+
+    void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('회원가입 성공'),
+          content: Text('회원가입이 성공적으로 완료되었습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                nameController.clear();
+                emailController.clear();
+                passwordController.clear();
+                confirmPasswordController.clear();
+                Navigator.push(context, MaterialPageRoute(builder: (c) {
+                  return LoginPage();
+                }));
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showFailDialog(String text) {
+    showDialog(
+       context: context,
+       builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('회원가입 실패'),
+          content: Text(text),
+          actions: [
+            TextButton(
+              onPressed: () {
+                nameController.clear();
+                emailController.clear();
+                passwordController.clear();
+                confirmPasswordController.clear();
+                Navigator.of(context).pop();
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    ) ;
   }
 }

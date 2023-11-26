@@ -3,27 +3,26 @@ import 'package:capstone/screen/navigation/drawer.dart';
 import 'package:capstone/screen/features/myhome.dart';
 import 'package:flutter_swiper_null_safety_flutter3/flutter_swiper_null_safety_flutter3.dart';
 import 'package:capstone/func/auth_manager.dart';
-import 'package:capstone/func/user_topic_manager.dart';
+import 'package:capstone/func/survey_topic_manager.dart';
 
 /*
 * 파일: survey.dart
-* 작성자: 오예진
 * 최초 작성일: 2023-11-25
-* 설명: 사용자가 선택질문에 대한 주제를 선택할 수 있는 화면입니다. 
+* 설명: 사용자가 선택질문에 대한 주제를 선택할 수 있는 화면
 */
 
-class UserSurvey extends StatefulWidget {
+class SurveyTopicSelect extends StatefulWidget {
   @override
-  State<UserSurvey> createState() => _UserSurvey();
+  State<SurveyTopicSelect> createState() => _SurveyTopicSelect();
 }
 
-class _UserSurvey extends State<UserSurvey> {
+class _SurveyTopicSelect extends State<SurveyTopicSelect> {
 
   AuthManager authManager = AuthManager();
   String userName = "";
   String userToken = "";
 
-  UserTopicManager userTopicManager = UserTopicManager();
+  SurveyTopicManager userTopicManager = SurveyTopicManager();
   
   int currentIndex = 0;
   SwiperController controller = SwiperController();
@@ -41,7 +40,7 @@ class _UserSurvey extends State<UserSurvey> {
 
     await authManager.loadToken();
     await authManager.loadUserInfo();
-    await userTopicManager.fetchAllServeyTopic();
+    await userTopicManager.fetchAllTopic();
 
     setState(() {
       userToken = authManager.fetchedUserToken;
@@ -49,7 +48,7 @@ class _UserSurvey extends State<UserSurvey> {
       surveyAllTopics = userTopicManager.surveyAllTopics;
     });
 
-    await userTopicManager.fetchUserTopic(userToken);
+    await userTopicManager.fetchTopic(userToken);
     
     setState(() {
       surveyUserTopics = userTopicManager.surveyUserTopics;
@@ -67,9 +66,9 @@ class _UserSurvey extends State<UserSurvey> {
   Future<void> onSaveButtonPressed() async {
     for (int i = 0; i < checkboxStates.length; i++) {
       if (checkboxStates[i]) {
-        await userTopicManager.saveUserTopic(surveyAllTopics[i], userName, userToken); // 선택된 토픽을 추가
+        await userTopicManager.saveTopic(surveyAllTopics[i], userName, userToken); // 선택된 토픽을 추가
       } else {
-        await userTopicManager.deleteUserTopic(surveyAllTopics[i], userName, userToken); // 선택 해제된 토픽을 삭제
+        await userTopicManager.deleteTopic(surveyAllTopics[i], userName, userToken); // 선택 해제된 토픽을 삭제
       }
     }
     showSaveConfirmationDialog(); //작업 완료 후 성공 메시지 
@@ -261,7 +260,7 @@ class _UserSurvey extends State<UserSurvey> {
                   onSaveButtonPressed();
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),
+                  backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),
                 ),
                 child: Text('저장', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               ),

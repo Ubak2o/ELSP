@@ -6,14 +6,8 @@ import 'package:capstone/screen/auth/sign_in.dart';
 
 /*
 * 파일: auth_manager.dart
-* 작성자: 오예진
 * 최초 작성일: 2023-11-25
 * 설명: 로그인, 로그아웃, 사용자 정보 조회 기능
-
-* 수정일 :
-* 수정자 :
-* 수정내용 : 
-
 */
 
 class AuthManager{
@@ -49,9 +43,10 @@ class AuthManager{
         final userInfo = json.decode(response.body);
         fetchedUserName = userInfo['username'];
         fetchedUserEmail  = userInfo['email'];
-        //print(fetchedUserName);
-        //print(fetchedUserEmail);
-      
+        
+        print(fetchedUserName);
+        print(fetchedUserEmail);
+
       } else {
         // 사용자 정보 가져오기 실패
         print('Failed to load user info. Status code: ${response.statusCode}');
@@ -65,6 +60,7 @@ class AuthManager{
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
+    
     if (token != null) {
       final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/logout/');
 
@@ -87,6 +83,62 @@ class AuthManager{
         }
       });
     }
+  }
+
+  Future<int> deleteUser(BuildContext context) async {
+
+    final token = await loadToken(); // 토큰을 가져오는 함수
+    final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/delete/');
+    int statusCode = 0;
+
+    try {
+      final response = await http.delete(
+        apiUrl,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      statusCode = response.statusCode;
+
+      if (statusCode == 204) {
+        print('User deleted successfully');
+      } else {
+        print('Failed to delete user. Status code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error deleting user: $error');
+  }
+  //print(statusCode);
+  return statusCode;
+}
+
+Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
+    var apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/register/');
+    Map<String, dynamic> responseBodyMap =  {};
+
+    final http.Response response = await http.post(
+      apiUrl,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(userData),
+    );
+
+    if (response.statusCode == 201) {
+      //회원가입 성공
+      print('Registration successful');
+    } else {
+     // 회원가입 실패
+      //print('Failed to register. Status code: ${response.statusCode}');
+      responseBodyMap = json.decode(response.body);
+      //List<dynamic> usernameErrors = responseBodyMap['username'] ?? [];
+      //List<dynamic> emailErrors = responseBodyMap['email'] ?? [];
+      //print('Username errors: $usernameErrors');
+      //print('Email errors: $emailErrors');
+    }
+    
+    return responseBodyMap;
   }
   
 }

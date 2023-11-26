@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/auth/sign_in.dart';
 
+/*
+* 파일: reset_password.dart
+* 최초 작성일: 2023-10-15
+* 설명: 비밀번호 초기화
+*/
+
 class ResetPasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
