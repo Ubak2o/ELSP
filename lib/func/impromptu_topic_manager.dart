@@ -12,10 +12,12 @@ class ImromptuTopicManager{
   List<String> impromptuAllTopics = [];
   List<String> ipromptuUserTopics = [];
   List<bool> checkboxStates = [];
+  String address = "http://172.20.10.2:8000";
 
   //모든 돌발주제의 토픽을 가져오는 함수
   Future<void> fetchAllTopic() async {
-    var getAllTopic = Uri.http('127.0.0.1:8000', '/quiz/all-impromptu-topics/');
+
+    final getAllTopic = Uri.parse('$address/quiz/all-impromptu-topics/');
   
     try {
       var getAllTopicResponse = await http.get(getAllTopic);
@@ -34,8 +36,9 @@ class ImromptuTopicManager{
 
   //유저가 선택한 선택주제의 토픽을 가져오는 함수
   Future<void> fetchTopic(String token) async {
-    var getUserTopic = Uri.http('127.0.0.1:8000', '/quiz/user-impromptu-topics-select/');
-  
+
+    final getUserTopic = Uri.parse('$address/quiz/user-impromptu-topics-select/');
+
     try {
       var getUserTopicUrlResponse = await http.get(
         getUserTopic ,
@@ -67,7 +70,8 @@ class ImromptuTopicManager{
 
   // 유저가 선택한 토픽을 데이터베이스에 저장하는 API를 호출하는 함수
   Future<void> saveTopic(String selectedTopic, String userName, String token) async {
-    var url = Uri.http('127.0.0.1:8000', 'quiz/user-impromptu-topic-create/');
+
+    final url = Uri.parse('$address/quiz/user-impromptu-topic-create/');
 
     try {
       await http.post(
@@ -88,7 +92,8 @@ class ImromptuTopicManager{
 
   // 유저가 선택 해제한 단일 토픽을 데이터베이스에서 삭제하는 API를 호출하는 함수
   Future<void> deleteTopic(String unselectedTopic, String userName, String token) async {
-    var url = Uri.http('127.0.0.1:8000', 'quiz/user-impromptu-topic-delete/');
+    
+    final url = Uri.parse('$address/quiz/user-impromptu-topic-delete/');
 
     try {
       await http.post(

@@ -3,6 +3,8 @@ import 'package:capstone/screen/features/myhome.dart';
 import 'package:capstone/model/model_quiz.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:capstone/screen/navigation/appbar.dart';
+import 'package:capstone/screen/navigation/bottom.dart';
 
 class ShowResult extends StatefulWidget{
   final String inputValue;
@@ -33,20 +35,7 @@ class _ShowResult extends State<ShowResult>{
         backgroundColor:  Color.fromARGB(255, 240, 251, 249),
         
         //상단바
-        appBar : AppBar(
-            title: const Text('Capstone Design', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
-            //centerTitle: true,
-            backgroundColor:  Color.fromARGB(255, 175, 221, 238),
-            leading: IconButton(
-              icon: Icon(Icons.navigate_before, color: Colors.black,),
-              onPressed: (){
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (c){
-                    return MyHome();
-                }));
-              },
-             ),
-        ),
+        appBar : buildAppBar(context),
 
         //body
         body : Center(
@@ -81,14 +70,13 @@ class _ShowResult extends State<ShowResult>{
         ), 
         
         //하단바
-        bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color.fromARGB(255, 175, 221, 238),
-        unselectedItemColor: Colors.black,
-        fixedColor: Colors.black,
-        items: const<BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.task_alt, color: Colors.black), label: 'check'),
-          BottomNavigationBarItem(icon: Icon(Icons.list, color: Colors.black), label: 'my record')
-       ],)  
+        bottomNavigationBar: buildBottomNavigationBar(context, 0, (index) {
+          if (index == 0) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
+          } else if (index == 1) {
+            print('Record');
+          }
+        }),
       )
     );       
   }
@@ -114,19 +102,19 @@ class _ShowResult extends State<ShowResult>{
                 icon: Icon(Icons.spellcheck, color: Colors.black), 
                 label: Text("문법 수정", style: TextStyle(fontWeight: FontWeight.bold),),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(width * 0.8, height * 0.07), // 가로 길이를 조절합니다.
+                  minimumSize: Size(width * 0.75, height * 0.06),
                   foregroundColor: Colors.black,
                   backgroundColor: Color.fromARGB(255, 175, 229, 238)
                 ),
               ),
             ),
 
-            SizedBox(height: 30),
+            SizedBox(height: 10),
 
             // 자신의 답변 출력 
             Container(
               width: width * 0.75,
-              height: height * 0.17,
+              height: height * 0.18,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
                 borderRadius: BorderRadius.circular(10),
@@ -156,7 +144,7 @@ class _ShowResult extends State<ShowResult>{
             // 교정된 답변 출력
             Container(
               width: width * 0.75,
-              height: height * 0.17,
+              height: height * 0.18,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
                 borderRadius: BorderRadius.circular(10),
@@ -183,7 +171,7 @@ class _ShowResult extends State<ShowResult>{
                 )
             ),
             
-            SizedBox(height: 30),
+            SizedBox(height: 20),
 
             //버튼
             ButtonBar(
@@ -192,7 +180,9 @@ class _ShowResult extends State<ShowResult>{
               ElevatedButton(
                 onPressed: () { controller.next(); },
                 style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),),
+                backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),
+                minimumSize: MaterialStateProperty.all(Size(width * 0.01, height * 0.05)),
+                ),
                 child: Text('다음', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               ),
             ],
@@ -223,14 +213,14 @@ class _ShowResult extends State<ShowResult>{
                 icon: Icon(Icons.spellcheck, color: Colors.black), 
                 label: Text("결과 확인하기", style: TextStyle(fontWeight: FontWeight.bold),),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(width * 0.8, height * 0.07), // 가로 길이를 조절합니다.
+                  minimumSize: Size(width * 0.75, height * 0.06),
                   foregroundColor: Colors.black,
                   backgroundColor: Color.fromARGB(255, 175, 229, 238)
                 ),
               ),
             ),
 
-            SizedBox(height : 330),
+            SizedBox(height : 100),
 
             //버튼
             ButtonBar(
@@ -239,14 +229,18 @@ class _ShowResult extends State<ShowResult>{
                 ElevatedButton(
                   onPressed: () {controller.previous(); },
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),),
+                    backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),
+                    minimumSize: MaterialStateProperty.all(Size(width * 0.01, height * 0.05)),
+                  ),
                   child: Text('이전', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
           
                 ElevatedButton(
                   onPressed: () { },
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),),
+                    backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),
+                    minimumSize: MaterialStateProperty.all(Size(width * 0.01, height * 0.05)),  
+                  ),
                   child: Text('저장', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
 
@@ -257,7 +251,9 @@ class _ShowResult extends State<ShowResult>{
                       return MyHome();
                     })); },
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),),
+                    backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 175, 229, 238)),
+                    minimumSize: MaterialStateProperty.all(Size(width * 0.01, height * 0.05)),
+                  ),
                   child: Text('종료', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
               ],

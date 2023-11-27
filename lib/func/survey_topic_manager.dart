@@ -12,11 +12,13 @@ class SurveyTopicManager{
   List<String> surveyAllTopics = [];
   List<String> surveyUserTopics = [];
   List<bool> checkboxStates = [];
+  String address = "http://172.20.10.2:8000";
 
   //모든 선택주제의 토픽을 가져오는 함수
   Future<void> fetchAllTopic() async {
-    var getAllTopic = Uri.http('127.0.0.1:8000', '/quiz/all-survey-topics/');
-  
+    
+    final getAllTopic = Uri.parse('$address/quiz/all-survey-topics/');
+
     try {
       var getAllTopicResponse = await http.get(getAllTopic);
       
@@ -35,7 +37,7 @@ class SurveyTopicManager{
   //유저가 선택한 선택주제의 토픽을 가져오는 함수
   Future<void> fetchTopic(String token) async {
 
-    var getUserTopic = Uri.http('127.0.0.1:8000', '/quiz/user-survey-topics-select/');
+    final getUserTopic = Uri.parse('$address/quiz/user-survey-topics-select/');
   
     try {
       var getUserTopicUrlResponse = await http.get(
@@ -68,8 +70,9 @@ class SurveyTopicManager{
 
   // 유저가 선택한 토픽을 데이터베이스에 저장하는 API를 호출하는 함수
   Future<void> saveTopic(String selectedTopic, String userName, String token) async {
-    var url = Uri.http('127.0.0.1:8000', 'quiz/user-survey-topic-create/');
 
+    final url = Uri.parse('$address/quiz/user-survey-topic-create/');
+  
     try {
       await http.post(
         url,
@@ -88,7 +91,8 @@ class SurveyTopicManager{
 
   // 유저가 선택 해제한 단일 토픽을 데이터베이스에서 삭제하는 API를 호출하는 함수
   Future<void> deleteTopic(String unselectedTopic, String userName, String token) async {
-    var url = Uri.http('127.0.0.1:8000', 'quiz/user-survey-topic-delete/'); // 적절한 API 경로로 수정
+    
+    final url = Uri.parse('$address/quiz/user-survey-topic-delete/');
 
     try {
       await http.post(

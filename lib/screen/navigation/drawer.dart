@@ -197,12 +197,6 @@ Widget buildHeader(BuildContext context, String userName, String userEmail) => G
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Color.fromARGB(255, 175, 221, 238),
-                backgroundImage: AssetImage('user.png'),
-              ),
-              
               SizedBox(height: 15),
               
               Text(

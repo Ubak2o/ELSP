@@ -1,17 +1,13 @@
+import 'package:capstone/func/auth_manager.dart';
 import 'package:capstone/screen/auth/reset_password.dart';
 import 'package:capstone/screen/auth/sign_up.dart';
-import 'package:capstone/screen/features/myhome.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';  // jsonEncode를 사용하기 위해 추가
 
 /*
 * 파일: sign_in.dart
 * 최초 작성일: 2023-10-15
 * 설명: 로그인 페이지
 */
-
 
 class LoginPage extends StatefulWidget {
   @override
@@ -20,99 +16,25 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPage extends State<LoginPage> {
 
+  AuthManager authManager = AuthManager();
+  String userToken = "";
+
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
+  @override
+  void initState() {
+    super.initState();
+    loadUserInfo();
   }
 
-  Future<String?> loadToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('token');
-  }
-
-  void loginUser() {
-    if (nameController.text.isEmpty || passwordController.text.isEmpty) {
-      // 경고 창 표시
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('경고'),
-            content: Text('이름과 비밀번호를 입력해주세요.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  nameController.clear();
-                  passwordController.clear();
-                  Navigator.of(context).pop();
-                },
-                child: Text('확인'),
-              ),
-            ],
-          );
-        },
-      );
-      return; // 함수 종료
-    }
-
-    final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/token/');
-    final Map<String, dynamic> userData = {
-      'username': nameController.text,
-      'password': passwordController.text,
-    };
-
-    http.post(
-      apiUrl,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(userData),
-    ).then((http.Response response) {
-      if (response.statusCode == 200) {
-        // 로그인 성공
-        print('Login successful');
-
-      // 서버 응답에서 토큰 추출
-        final token = json.decode(response.body)['access'];
-        //print('Token: $token');
-
-      // 여기에서 적절한 화면 전환 또는 처리를 수행할 수 있습니다.
-        nameController.clear();
-        passwordController.clear();
-        saveToken(token);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
-      
-      }else if (response.statusCode == 401) {
-        // 사용자 정보가 없는 경우
-        // 경고 창 표시
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('경고'),
-              content: Text('사용자 정보가 없습니다.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    nameController.clear();
-                    passwordController.clear();
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('확인'),
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        // 로그인 실패
-        print('Failed to login. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-      }
-    }); 
+  Future<void> loadUserInfo() async {
+    // await를 사용하여 비동기 함수 기다리기
+    await authManager.loadToken(); 
+    // setState 메서드를 사용해서 loadUserInfo 함수가 완료된 후에 build 메서드에서 UI를 업데이트
+    setState(() {
+      userToken = authManager.fetchedUserToken;
+    });
   }
 
   @override
@@ -155,16 +77,17 @@ class _LoginPage extends State<LoginPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const[
+                          SizedBox(height: 10,),
                           Text(
                               'Capstone Design Project',
                             style: TextStyle(
                               color: Color.fromARGB(255, 35, 35, 35),
-                              fontSize: 30.0,
+                              fontSize: 20.0,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           SizedBox(
-                            height: 10.0,
+                            height: 15.0,
                           ),
                           Text(
                             'Please login in or sign up to continue using out app.',
@@ -248,14 +171,14 @@ class _LoginPage extends State<LoginPage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: (){
-                                loginUser();
                                 //print(nameController.text);
-                                //print(passwordController.text);       
+                                //print(passwordController.text);
+                                authManager.loginUser(context, nameController, passwordController);    
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color.fromARGB(255, 175, 221, 238)),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: Text(
                                   "로그인",
                                   style: TextStyle(
@@ -268,7 +191,7 @@ class _LoginPage extends State<LoginPage> {
                           ),
                           
                           SizedBox(
-                            height: 20.0,
+                            height: 10.0,
                           ),
                          
                           //회원가입 버튼 
@@ -282,10 +205,10 @@ class _LoginPage extends State<LoginPage> {
                                 }));
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color.fromARGB(255, 175, 221, 238)),
+                                backgroundColor: Colors.white),
                               //color: Colors.blue[800],
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: Text(
                                   "회원가입",
                                   style: TextStyle(

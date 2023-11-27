@@ -13,6 +13,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
 import 'package:capstone/func/auth_manager.dart';
+import 'package:capstone/screen/auth/sign_in.dart';
 
 /*
 * 파일: myhome.dart
@@ -23,15 +24,26 @@ import 'package:capstone/func/auth_manager.dart';
 * 수정 내용: 사용자가 선택한 주제별로 질문을 재생하는 기능을 추가 
 */
 
-class MyHome extends StatelessWidget{
+class MyHome extends StatefulWidget{
+  @override
+  State<MyHome> createState() => _MyHome();
+}
+
+class _MyHome extends State<MyHome>{
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Color.fromARGB(255, 240, 251, 249),
+      
       appBar: buildAppBar(context),
+      
       drawer: MyDrawer(),
-      body: UserRecord(),
+      
+      body: SingleChildScrollView(
+        child : UserRecord(),
+      ),
       bottomNavigationBar:buildBottomNavigationBar(context, 0, (index) {
         if (index == 0) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
@@ -53,8 +65,8 @@ class _UserRecord extends State<UserRecord>{
   AuthManager authManager = AuthManager();
   String userToken = "";
   String userName = "";
+  String address = "http://172.20.10.2:8000";
 
-  // 초기화 함수
   @override
   void initState() {
     super.initState();
@@ -62,6 +74,7 @@ class _UserRecord extends State<UserRecord>{
     selectedSection = "선택주제";
     selectedSecond = "20";
     loadStatus();
+
   }
 
   @override
@@ -76,7 +89,14 @@ class _UserRecord extends State<UserRecord>{
     setState(() {
       userToken = authManager.fetchedUserToken;
       userName = authManager.fetchedUserName;
-    }); 
+    });
+
+    //print(userToken);
+    //print(userName);
+
+    if(userName.isEmpty){
+      noSelectedTopicDialog();
+    }  
   }
 
   //STT
@@ -113,124 +133,125 @@ class _UserRecord extends State<UserRecord>{
   
   @override
   Widget build(BuildContext context){
-
-     // MediaQuery를 통해 현재 화면의 크기 및 다양한 속성에 액세스
+    // MediaQuery를 통해 현재 화면의 크기 및 다양한 속성에 액세스
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
     double height = screenSize.height;
 
     return Container(
-      width: width , // 화면 너비의 80%
-      height: height * 0.8, // 화면 높이의 80%
-      padding: EdgeInsets.all(30),
-        
+      width: width , 
+      height: height, 
+      padding: EdgeInsets.all(10),
+
         child: Column(
+          
           children: [
             //제목 
             ElevatedButton(
                 onPressed: () {}, 
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(width * 0.9, height * 0.073), // 현재 화면 너비의 80%
+                  minimumSize: Size(width * 0.87, height * 0.073), 
                   foregroundColor: Colors.black,
-                  backgroundColor: Color.fromARGB(255, 175, 229, 238), // 비활성화된 상태일 때의 배경색
+                  backgroundColor: Color.fromARGB(255, 175, 229, 238), 
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                    borderRadius: BorderRadius.circular(30), 
                   ),
                 ),
                 child: Text("Self OPic Test", style: TextStyle(fontWeight: FontWeight.bold),),
             ),
 
-            // 간격 늘리기
-            SizedBox(height: 10),
-       
-            Row(children: [
-              ButtonBar(children: [
-                 
-                 //Dropdown 버튼 (사용자가 질문 섹션을 선택)
-                DropdownButton2<String>(
-                  hint: const Row(
-                    children: [
-                      Text(
-                        '주제 선택',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      )
-                    ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ButtonBar(children: [
+                   //사용자가 질문 섹션을 선택
+                  DropdownButton2<String>(
+                    hint: const Row(
+                      children: [
+                        Text(
+                          '주제 선택',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        )
+                      ],
+                    ),
+                    value: selectedSection,
+                    items: section.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(),
+                    onChanged: (String? value){setState(() {
+                      selectedSection = value;
+                    });}
                   ),
-                  value: selectedSection,
-                  items: section.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(),
-                  onChanged: (String? value){setState(() {
-                    selectedSection = value;
-                  });}
-                ),
 
-                //재생하기 버튼 
-                IconButton(
-                  onPressed: () async {
-                    //print('재생 버튼 누를 때의 버튼 값 :  $selectedSection');
-                    if(isSpeaking){
-                      stopSpeaking();
-                    }else{
-                      speak();
-                    }
-                  },
-                  icon: Icon(isSpeaking ? Icons.stop_circle : Icons.play_circle, color: Colors.red), 
-                  iconSize: 30,
-                  tooltip: "재생",
-                ),
-
-                //질문 보기 버튼 
-                ElevatedButton(
-                  onPressed: (){ 
-                    setState(() { 
-                      if (questionText == quiz.question) {
-                          // 버튼을 한 번 더 눌렀을 때 현재 질문과 같으면 초기화
-                          questionText = '';
-                          viewText = '질문을 보려면 버튼을 누르세요';
-                      } else {
-                          questionText = quiz.question;
-                          viewText = quiz.question;
+                  //재생하기 버튼 
+                  IconButton(
+                    onPressed: () async {
+                      //print('재생 버튼 누를 때의 버튼 값 :  $selectedSection');
+                      if(isSpeaking){
+                        stopSpeaking();
+                      }else{
+                        speak();
                       }
-                    });
-                  },  
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: const Color.fromARGB(255, 224, 241, 248),
-                    shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                    },
+                    icon: Icon(isSpeaking ? Icons.stop_circle : Icons.play_circle, color: Colors.red), 
+                    iconSize: 30,
+                    tooltip: "재생",
                   ),
-                  ),
-                  child :  Text("질문 보기", style: TextStyle(fontWeight: FontWeight.bold),),
-                ),
 
-                //질문바꾸기 버튼
-                ElevatedButton(
-                  onPressed: (){ 
-                    setState(() { 
-                      viewText = '질문을 보려면 버튼을 누르세요';
-                    });
-                    fetchQuiz(); 
-                  }, 
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: const Color.fromARGB(255, 224, 241, 248),
-                    shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                  //질문 보기 버튼 
+                  ElevatedButton(
+                    onPressed: (){ 
+                      setState(() { 
+                        if (questionText == quiz.question) {
+                            // 버튼을 한 번 더 눌렀을 때 현재 질문과 같으면 초기화
+                            questionText = '';
+                            viewText = '질문을 보려면 버튼을 누르세요';
+                        } else {
+                            questionText = quiz.question;
+                            viewText = quiz.question;
+                          }
+                        }
+                      );
+                    },  
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(width * 0.01, height * 0.05), // 현재 화면 너비의 80%
+                      foregroundColor: Colors.black,
+                      backgroundColor: const Color.fromARGB(255, 224, 241, 248),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                      ),
+                    ),
+                    child : Icon(Icons.description, size: 18),
                   ),
+
+                  //질문바꾸기 버튼
+                  ElevatedButton(
+                    onPressed: (){ 
+                      setState(() { 
+                        viewText = '질문을 보려면 버튼을 누르세요';
+                      });
+                      fetchQuiz(); 
+                    }, 
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(width * 0.01, height * 0.05), // 현재 화면 너비의 80%
+                      foregroundColor: Colors.black,
+                      backgroundColor: const Color.fromARGB(255, 224, 241, 248),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                      ),
+                    ),
+                    child: Icon(Icons.replay_circle_filled, size: 18),
                   ),
-                  child: Text("바꾸기", style: TextStyle(fontWeight: FontWeight.bold),),
-                ),
-              ],),   
-            ],),
-            
-            SizedBox(height: 10),
-            
+                ],),   
+              ],
+            ),
+
             Container( 
-              width: width, // 화면 너비의 80%
-              height: height * 0.13, // 화면 높이의 80%
+              width: width * 0.87, 
+              height: height * 0.12,
+              
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: Colors.white, width: 1.5),
@@ -254,85 +275,82 @@ class _UserRecord extends State<UserRecord>{
                 ),
               ),
             ),
+
+            SizedBox(height: 8),
             
-            SizedBox(height: 10),
-
-            Row(children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               ButtonBar(children: [
-              
-              //Dropdown버튼(사용자가 녹음할 시간을 선택)
-              DropdownButton2<String>(
-                  hint: const Row(
-                    children: [
-                      Text(
-                        '초 선택',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      )
-                    ],
-                  ),
-                value: selectedSecond,
-                items: second.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(),
-                onChanged: (String? value){setState(() {
-                  selectedSecond = value;
-                  time = int.parse(value!);
-                });}),
-
-                SizedBox(width: 10),
+              //사용자가 녹음할 시간을 선택
+                DropdownButton2<String>(
+                    hint: const Row(
+                      children: [
+                        Text(
+                          '초 선택',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        )
+                      ],
+                    ),
+                  value: selectedSecond,
+                  items: second.map((e) => DropdownMenuItem(value: e, child: Text(e),)).toList(),
+                  onChanged: (String? value){setState(() {
+                    selectedSecond = value;
+                    time = int.parse(value!);
+                  });}),
 
                 SizedBox( 
-                  width: width * 0.25, // 화면 너비의 80%
-                  height: height * 0.055, // 화면 높이의 80%
+                  width: width * 0.2, // 화면 너비의 80%
+                  height: height * 0.05, // 화면 높이의 80%
                   child: Text(
-                    '남은 시간 : $time 초',
+                    '$time 초',
                     style: TextStyle(fontSize: 17, height: 2.3, color: const Color.fromARGB(255, 61, 61, 61)), 
                     textAlign: TextAlign.center
                   ),
-              ),
+                ),
 
-              SizedBox(width: 10),
-
-              //녹음하기 버튼 
-              ElevatedButton.icon(
-                onPressed: () {
+                //녹음하기 버튼 
+                ElevatedButton.icon(
+                  onPressed: () {
                     listen();
                     print('Recording Result:  $speechToText');
                     textController.text = speechToText;
-                },  
-                icon: Icon(isListening ? Icons.radio_button_checked : Icons.mic, color: Colors.red), 
-                label: Text(isListening ? "녹음중단" : "녹음하기", style: TextStyle(fontWeight: FontWeight.bold),),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Color.fromARGB(255, 175, 229, 238),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                  },  
+                  icon: Icon(isListening ? Icons.radio_button_checked : Icons.mic, color: Colors.red), 
+                  label: Text(isListening ? "녹음중단" : "녹음하기", style: TextStyle(fontWeight: FontWeight.bold),),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(width * 0.01, height * 0.06),
+                    foregroundColor: Colors.black,
+                    backgroundColor: Color.fromARGB(255, 175, 229, 238),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // 여기서 원하는 값을 지정
+                    ),
                   ),
                 ),
-              ),
-            ],), 
-
+              ],), 
             ],),
 
-            SizedBox(height: 10),
-            
             //녹음을 텍스트로 바꿔줌
             Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.white, width: 1.5),
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 1,
-                      blurRadius: 10,
-                      offset: Offset(0, 1), // changes position of shadow
-                    ),
-                  ],
-                ),
+              width: width * 0.87, // 화면 너비의 80%
+              height: height * 0.18, // 화면 높이의 80%
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.white, width: 1.5),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 1,
+                    blurRadius: 10,
+                    offset: Offset(0, 1), // changes position of shadow
+                  ),
+                ],
+              ),
               
               //녹음된 음성이 보여지는 필드
               child: TextFormField(
@@ -357,18 +375,20 @@ class _UserRecord extends State<UserRecord>{
                 maxLines: 3,
               ),
             ),
-           
-            SizedBox(height: 10),
+
+            SizedBox(height: 8),
           
             // 제출하기
-            ButtonBar(children: [
-              ElevatedButton.icon(
+            ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: [ ElevatedButton.icon(
                 onPressed: () {
                   setState(() {
+                    
                     inputValue = textController.text;
                     print('input : $inputValue');
-                    Navigator.push(context,
-                    MaterialPageRoute(builder: (c){
+                    
+                    Navigator.push(context, MaterialPageRoute(builder: (c){
                       return ShowResult(inputValue, quiz);
                     }));
                   });
@@ -376,6 +396,7 @@ class _UserRecord extends State<UserRecord>{
                 icon: Icon(Icons.check, color: Color.fromARGB(255, 20, 137, 46)), 
                 label: Text("제출하기", style: TextStyle(fontWeight: FontWeight.bold),), 
                 style : ElevatedButton.styleFrom(
+                  minimumSize: Size(width * 0.01, height * 0.06),
                   foregroundColor: Colors.black,
                   backgroundColor: Color.fromARGB(255, 175, 229, 238),
                   shape: RoundedRectangleBorder(
@@ -383,13 +404,12 @@ class _UserRecord extends State<UserRecord>{
                   ),
                 ),
               ),
-            ],
+              ],
           ), 
         ],
       )
     );
   }
-
   //질문을 불러오는 함수
   Future<void> fetchQuiz() async {
     
@@ -402,7 +422,9 @@ class _UserRecord extends State<UserRecord>{
 
     //사용자가 선택한 주제에 따라서 다른 API앤드포인트 호출 
     if (selectedSection == '선택주제') {
-      url = Uri.http('127.0.0.1:8000', '/quiz/survey/');
+      
+      url = Uri.parse('$address/quiz/survey/');
+
       response = await http.get(
         url,
         headers: {
@@ -411,7 +433,9 @@ class _UserRecord extends State<UserRecord>{
       ); 
 
     } else if (selectedSection == '돌발주제') {
-      url = Uri.http('127.0.0.1:8000', '/quiz/impromptu/');
+
+      url = Uri.parse('$address/quiz/impromptu/');
+
       response = await http.get(
         url,
         headers: {
@@ -427,7 +451,8 @@ class _UserRecord extends State<UserRecord>{
         isLoading = false;
       });
     } else if(response.statusCode == 500){
-      showFailDialog();
+      noSelectedTopicDialog();
+      quiz = Quiz(question: ' ', topic: ' ', section: ' ');
       
     } else {
       throw Exception('failed to load selected quiz');
@@ -466,7 +491,7 @@ class _UserRecord extends State<UserRecord>{
  }
 
   //TTS 초기화 및 관련 함수
-  Future<void> initTts( ) async{
+  Future<void> initTts() async{
     await flutterTts.setLanguage("en-US"); // 언어 설정
     await flutterTts.setPitch(1.0); // 음성 높낮이 설정
     await flutterTts.setSpeechRate(0.8); // 음성 속도 설정
@@ -529,7 +554,29 @@ class _UserRecord extends State<UserRecord>{
     });
   }
 
-  void showFailDialog() {
+  void noSelectedTopicDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('경고'),
+          content: Text('로그인 세션이 만료 되었습니다. 다시 로그인해주세요.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (c) {
+                  return LoginPage();
+                }));
+              },
+              child: Text('확인'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void noUserTokenDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {

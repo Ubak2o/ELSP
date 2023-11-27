@@ -65,7 +65,7 @@ class _SignupPage extends State<SignupPage> {
                           'Create Your Account',
                           style: TextStyle(
                             color: Color.fromARGB(255, 35, 35, 35),
-                            fontSize: 30.0,
+                            fontSize: 23.0,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -108,6 +108,7 @@ class _SignupPage extends State<SignupPage> {
                           TextField(
                             controller: nameController,
                             decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                                 borderSide: BorderSide.none,
@@ -121,12 +122,13 @@ class _SignupPage extends State<SignupPage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 20.0,),
+                          SizedBox(height: 8.0,),
                           
                           // 이메일 입력
                           TextField(
                             controller: emailController,
                             decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                                 borderSide: BorderSide.none,
@@ -141,13 +143,14 @@ class _SignupPage extends State<SignupPage> {
                             ),
                           ),
                           
-                          SizedBox(height: 20.0,),
+                          SizedBox(height: 8.0,),
                           
                           // 패스워드 입력
                           TextField(
                             controller: passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                                 borderSide: BorderSide.none,
@@ -162,13 +165,14 @@ class _SignupPage extends State<SignupPage> {
                             ),
                           ),
                           
-                          SizedBox(height: 20.0,),
+                          SizedBox(height: 8.0,),
                           
                           // 패스워드 재입력
                           TextField(
                             controller : confirmPasswordController,
                             obscureText: true,
                             decoration: InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8.0),
                                 borderSide: BorderSide.none,
@@ -190,7 +194,7 @@ class _SignupPage extends State<SignupPage> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: ()async {
 
                                 // 비밀번호가 일치하지 않을 때, 경고 창 띄우기
                                 if (passwordController.text != confirmPasswordController.text) {
@@ -202,8 +206,11 @@ class _SignupPage extends State<SignupPage> {
                                     'email': emailController.text,
                                     'password': passwordController.text,
                                   };
-                                  
+
                                   authManager.register(userData).then((result) {
+
+                                    print(result);
+                                    
                                     // 결과를 사용하는 코드
                                     if(result.isEmpty){
                                       showSuccessDialog();
@@ -231,7 +238,7 @@ class _SignupPage extends State<SignupPage> {
                               ),
 
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: Text(
                                   "회원가입",
                                   style: TextStyle(
@@ -243,7 +250,7 @@ class _SignupPage extends State<SignupPage> {
                             ),
                           ),
                           
-                          SizedBox(height: 20.0,),
+                          SizedBox(height: 8.0,),
                           
                           // 이미 계정이 있다면 로그인 버튼
                           SizedBox(
@@ -259,7 +266,7 @@ class _SignupPage extends State<SignupPage> {
                                 backgroundColor: Colors.white,
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
                                 child: Text(
                                   "이미 계정이 있으신가요?",
                                   style: TextStyle(

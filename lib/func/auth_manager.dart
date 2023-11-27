@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; 
 import 'package:capstone/screen/auth/sign_in.dart';
+import 'package:capstone/screen/features/myhome.dart';
 
 /*
 * 파일: auth_manager.dart
@@ -15,6 +16,12 @@ class AuthManager{
   String fetchedUserToken = ""; // `String`로 변경
   String fetchedUserName = "";
   String fetchedUserEmail = "";
+  String address = "http://172.20.10.2:8000";
+
+  Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+  }
 
   // 토큰을 저장하고 로드하는 함수 
   Future<String?> loadToken() async {
@@ -29,7 +36,7 @@ class AuthManager{
     final token = await loadToken(); // 토큰을 가져오는 함수
   
     if (token != null) {
-      final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/profile/');
+      final apiUrl = Uri.parse('$address/quiz/profile/');
 
       final response = await http.get(
         apiUrl,
@@ -44,8 +51,8 @@ class AuthManager{
         fetchedUserName = userInfo['username'];
         fetchedUserEmail  = userInfo['email'];
         
-        print(fetchedUserName);
-        print(fetchedUserEmail);
+        print("username : $fetchedUserName");
+        print("useremail : $fetchedUserEmail");
 
       } else {
         // 사용자 정보 가져오기 실패
@@ -62,7 +69,7 @@ class AuthManager{
     final token = prefs.getString('token');
     
     if (token != null) {
-      final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/logout/');
+      final apiUrl = Uri.parse('$address/quiz/logout/');
 
       http.post(
         apiUrl,
@@ -88,7 +95,7 @@ class AuthManager{
   Future<int> deleteUser(BuildContext context) async {
 
     final token = await loadToken(); // 토큰을 가져오는 함수
-    final apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/delete/');
+    final apiUrl = Uri.parse('$address/quiz/delete/');
     int statusCode = 0;
 
     try {
@@ -114,7 +121,7 @@ class AuthManager{
 }
 
 Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
-    var apiUrl = Uri.parse('http://127.0.0.1:8000/quiz/register/');
+    var apiUrl = Uri.parse('$address/quiz/register/');
     Map<String, dynamic> responseBodyMap =  {};
 
     final http.Response response = await http.post(
@@ -140,5 +147,94 @@ Future<Map<String, dynamic>> register(Map<String, dynamic> userData) async {
     
     return responseBodyMap;
   }
+
+  Future<void> loginUser(BuildContext context, TextEditingController nameController, TextEditingController passwordController) async{
+    
+    print('in loginUser');
+
+    if (nameController.text.isEmpty || passwordController.text.isEmpty) {
+      // 경고 창 표시
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('경고'),
+            content: Text('이름과 비밀번호를 입력해주세요.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  nameController.clear();
+                  passwordController.clear();
+                  Navigator.of(context).pop();
+                },
+                child: Text('확인'),
+              )
+            ],
+          );
+        },
+      );
+      return; // 함수 종료
+    }
+
+    final apiUrl = Uri.parse('$address/quiz/token/');
+    
+    final Map<String, dynamic> userData = {
+      'username': nameController.text,
+      'password': passwordController.text,
+    };
+
+    print(userData);
+
+    http.post(
+      apiUrl,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(userData),
+    ).then((http.Response response) {
+
+      if (response.statusCode == 200) {
+        // 로그인 성공
+        print('Login successful');
+
+      // 서버 응답에서 토큰 추출
+        final token = json.decode(response.body)['access'];
+        //print('Token: $token');
+
+      // 여기에서 적절한 화면 전환 또는 처리를 수행할 수 있습니다.
+        nameController.clear();
+        passwordController.clear();
+        saveToken(token);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
+      
+      }else if (response.statusCode == 401) {
+        // 사용자 정보가 없는 경우
+        // 경고 창 표시
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('경고'),
+              content: Text('사용자 정보가 없습니다.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    nameController.clear();
+                    passwordController.clear();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('확인'),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        // 로그인 실패
+        print('Failed to login. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    }); 
   
+  }
 }

@@ -1,9 +1,12 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/navigation/drawer.dart';
 import 'package:capstone/screen/features/myhome.dart';
 import 'package:flutter_swiper_null_safety_flutter3/flutter_swiper_null_safety_flutter3.dart';
 import 'package:capstone/func/auth_manager.dart';
 import 'package:capstone/func/survey_topic_manager.dart';
+import 'package:capstone/screen/navigation/appbar.dart';
+import 'package:capstone/screen/navigation/bottom.dart';
 
 /*
 * 파일: survey.dart
@@ -106,18 +109,7 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
     return Scaffold(
       backgroundColor: Color.fromARGB(255, 240, 251, 249),
 
-      appBar: AppBar(
-        title: const Text('Capstone Design', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        backgroundColor: Color.fromARGB(255, 175, 221, 238),
-        leading: IconButton(
-          icon: Icon(Icons.navigate_before, color: Colors.black),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (c) {
-              return MyHome();
-            }));
-          },
-        ),
-      ),
+      appBar: buildAppBar(context),
 
       drawer: MyDrawer(),
 
@@ -149,27 +141,13 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
         ),
       ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color.fromARGB(255, 175, 221, 238),
-        unselectedItemColor: Colors.black,
-        fixedColor: Colors.black,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.task_alt, color: Colors.black), label: 'check'),
-          BottomNavigationBarItem(icon: Icon(Icons.list, color: Colors.black), label: 'my record')
-        ],
-        onTap: (int index) {
-          if (index == 0) {
-            Navigator.push(context, MaterialPageRoute(builder: (c) {
-              return MyHome();
-            }));
-          } else if (index == 1) {
-            /*Navigator.push(context,
-              MaterialPageRoute(builder: (c){
-                return MyHome();
-          }));*/
-          }
-        },
-      ),
+      bottomNavigationBar:buildBottomNavigationBar(context, 0, (index) {
+        if (index == 0) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
+        } else if (index == 1) {
+          print('Record');
+        }
+      }),
     );
   }
 
@@ -207,21 +185,21 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
             padding: EdgeInsets.fromLTRB(0, width * 0.024, 0, width * 0.024),
             child: ElevatedButton.icon(
               onPressed: () {},
-              icon: Icon(Icons.check, color: Colors.black),
-              label: Text("Background Survey", style: TextStyle(fontWeight: FontWeight.bold)),
+              icon: Icon(Icons.task_alt, color: Colors.black),
+              label: AutoSizeText("연습하고 싶은 주제를 선택해주세요", style: TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(width * 0.8, height * 0.07),
+                minimumSize: Size(width * 0.75, height * 0.06),
                 foregroundColor: Colors.black,
                 backgroundColor: Color.fromARGB(255, 175, 229, 238),
               ),
             ),
           ),
 
-          SizedBox(height: 12),
+          SizedBox(height: 3),
           
           Container(
-            width: width * 0.8,
-            height: height * 0.46,
+            width: width * 0.75,
+            height: height * 0.44,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.white, width: 1.5),
               borderRadius: BorderRadius.circular(15),
@@ -250,7 +228,7 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
             ),
           ),
 
-          SizedBox(height: 12),
+          SizedBox(height: 3),
           
           ButtonBar(
             alignment: MainAxisAlignment.center,
@@ -261,6 +239,7 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
                 },
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),
+                  minimumSize: MaterialStateProperty.all(Size(width * 0.01, height * 0.05)), // 높이 조절            
                 ),
                 child: Text('저장', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
               ),
