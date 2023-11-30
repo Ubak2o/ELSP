@@ -29,9 +29,7 @@ class _LoginPage extends State<LoginPage> {
   }
 
   Future<void> loadUserInfo() async {
-    // await를 사용하여 비동기 함수 기다리기
     await authManager.loadToken(); 
-    // setState 메서드를 사용해서 loadUserInfo 함수가 완료된 후에 build 메서드에서 UI를 업데이트
     setState(() {
       userToken = authManager.fetchedUserToken;
     });
@@ -171,9 +169,14 @@ class _LoginPage extends State<LoginPage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: (){
-                                //print(nameController.text);
-                                //print(passwordController.text);
-                                authManager.loginUser(context, nameController, passwordController);    
+
+                                String name = nameController.text.toString();
+                                String passwd = passwordController.text.toString();
+                                authManager.loginUser(context, name, passwd);
+
+                                nameController.clear();
+                                passwordController.clear();
+                              
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Color.fromARGB(255, 175, 221, 238)),

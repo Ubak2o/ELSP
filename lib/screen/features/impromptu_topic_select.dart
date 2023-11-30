@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/navigation/drawer.dart';
 import 'package:capstone/screen/features/myhome.dart';
@@ -59,9 +60,9 @@ class _ImpromptuTopicSelect extends State<ImpromptuTopicSelect> {
     });
 
     //print("in loadUserStatus [surveyAllTopics] : $userToken");
-    print("in loadUserStatus [impromptuAllTopics] : $impromptuAllTopics");
+    //print("in loadUserStatus [impromptuAllTopics] : $impromptuAllTopics");
     print("in loadUserStatus [impromptuUserTopics] : $impromptuUserTopics ");
-    print("in loadUserStatus [checkboxStates] : $checkboxStates");
+    //print("in loadUserStatus [checkboxStates] : $checkboxStates");
 
   }
 
@@ -158,7 +159,11 @@ class _ImpromptuTopicSelect extends State<ImpromptuTopicSelect> {
 
     if (index < impromptuAllTopics.length && index < checkboxStates.length) {
       return CheckboxListTile(
-        title: Text(impromptuAllTopics[index]),
+
+        dense: true, // Reduces the height of the ListTile
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.0),
+
+        title: AutoSizeText(impromptuAllTopics[index]),
         value: checkboxStates[index],
         onChanged: (bool? value) {
           setStatus(List.from(checkboxStates)..[index] = value!);
@@ -186,7 +191,7 @@ class _ImpromptuTopicSelect extends State<ImpromptuTopicSelect> {
             child: ElevatedButton.icon(
               onPressed: () {},
               icon: Icon(Icons.task_alt, color: Colors.black),
-              label: Text("연습하고 싶은 주제를 선택해주세요", style: TextStyle(fontWeight: FontWeight.bold)),
+              label: Text("돌발질문 주제 선택", style: TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(width * 0.75, height * 0.06),
                 foregroundColor: Colors.black,

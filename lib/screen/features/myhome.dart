@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:capstone/model/api_adapter.dart';
-import 'package:capstone/screen/features/show_result.dart';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:flutter_tts/flutter_tts.dart' ;
@@ -13,7 +12,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
 import 'package:capstone/func/auth_manager.dart';
-import 'package:capstone/screen/auth/sign_in.dart';
+import 'package:capstone/func/result_manager.dart';
 
 /*
 * 파일: myhome.dart
@@ -44,6 +43,7 @@ class _MyHome extends State<MyHome>{
       body: SingleChildScrollView(
         child : UserRecord(),
       ),
+
       bottomNavigationBar:buildBottomNavigationBar(context, 0, (index) {
         if (index == 0) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
@@ -73,8 +73,7 @@ class _UserRecord extends State<UserRecord>{
     initTts(); // TTS 초기화
     selectedSection = "선택주제";
     selectedSecond = "20";
-    loadStatus();
-
+    loadStatus(); //사용자의 토큰과 이름을 가져옴 
   }
 
   @override
@@ -83,20 +82,19 @@ class _UserRecord extends State<UserRecord>{
     super.dispose();
   }
 
-   Future<void> loadStatus() async {
-    await authManager.loadToken();
-    await authManager.loadUserInfo();
+  Future<void> loadStatus() async {
+
+    if(await authManager.loadToken() == null || await authManager.loadUserInfo() == 401){
+      logoutAndNavigateToLoginPage();
+    }
     setState(() {
       userToken = authManager.fetchedUserToken;
       userName = authManager.fetchedUserName;
     });
+  }
 
-    //print(userToken);
-    //print(userName);
-
-    if(userName.isEmpty){
-      noSelectedTopicDialog();
-    }  
+  void logoutAndNavigateToLoginPage() {
+    authManager.showAuthDialog(context,"세션 만료", "세션이 만료되었습니다. 다시 로그인해 주세요.");
   }
 
   //STT
@@ -133,6 +131,7 @@ class _UserRecord extends State<UserRecord>{
   
   @override
   Widget build(BuildContext context){
+
     // MediaQuery를 통해 현재 화면의 크기 및 다양한 속성에 액세스
     Size screenSize = MediaQuery.of(context).size;
     double width = screenSize.width;
@@ -387,10 +386,11 @@ class _UserRecord extends State<UserRecord>{
                     
                     inputValue = textController.text;
                     print('input : $inputValue');
+                    ResultManager resultManager = ResultManager(quiz: quiz, inputValue : inputValue);
+                    resultManager.sendRequest(context);
                     
-                    Navigator.push(context, MaterialPageRoute(builder: (c){
-                      return ShowResult(inputValue, quiz);
-                    }));
+                    textController.clear();
+                    
                   });
                 },
                 icon: Icon(Icons.check, color: Color.fromARGB(255, 20, 137, 46)), 
@@ -450,6 +450,9 @@ class _UserRecord extends State<UserRecord>{
         quiz = newQuiz;
         isLoading = false;
       });
+      
+      print("section : ${quiz.section}, topic : ${quiz.topic}, question : ${quiz.question}");
+    
     } else if(response.statusCode == 500){
       noSelectedTopicDialog();
       quiz = Quiz(question: ' ', topic: ' ', section: ' ');
@@ -494,7 +497,7 @@ class _UserRecord extends State<UserRecord>{
   Future<void> initTts() async{
     await flutterTts.setLanguage("en-US"); // 언어 설정
     await flutterTts.setPitch(1.0); // 음성 높낮이 설정
-    await flutterTts.setSpeechRate(0.8); // 음성 속도 설정
+    await flutterTts.setSpeechRate(0.3); // 음성 속도 설정
     flutterTts.setCompletionHandler(() {
       setState(() {
         isSpeaking = false;
@@ -554,46 +557,9 @@ class _UserRecord extends State<UserRecord>{
     });
   }
 
+  //선택된 주제가 없을 경우 경고 알림창
   void noSelectedTopicDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('경고'),
-          content: Text('로그인 세션이 만료 되었습니다. 다시 로그인해주세요.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (c) {
-                  return LoginPage();
-                }));
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void noUserTokenDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('경고'),
-          content: Text('선택된 주제가 없습니다. 주제를 선택해주세요.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
+    authManager.showAuthDialog(context, "경고", "선택된 주제가 없습니다");
   }
 }
 

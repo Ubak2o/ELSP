@@ -5,11 +5,14 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
+import 'package:flutter/services.dart';
 
 class ShowResult extends StatefulWidget{
+
   final String inputValue;
+  final String correctedResponse;
   final Quiz quiz;
-  ShowResult(this.inputValue, this.quiz, );
+  ShowResult(this.quiz, this.inputValue, this.correctedResponse);
 
   @override
   State<ShowResult> createState() =>  _ShowResult();
@@ -20,7 +23,8 @@ class _ShowResult extends State<ShowResult>{
   SwiperController controller = SwiperController();
     
   TextEditingController textController = TextEditingController();
-  String inputText = ''; // 텍스트 값을 저장할 변수
+  String inputText = ''; // 사용자 입력 값을 저장할 변수
+  String outputText = ''; // 문법 교정된 문자열을 저장할 변수
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +65,9 @@ class _ShowResult extends State<ShowResult>{
               itemCount: 2,
               itemBuilder: (BuildContext context, int index) {
                 if(index == 0){
-                  return checkText1(widget.inputValue, widget.quiz, width, height);
+                  return checkText1(widget.quiz, widget.inputValue, widget.correctedResponse, width, height);
                 }else{}
-                  return checkText2(widget.inputValue, widget.quiz, width, height);
+                  return checkText2(widget.quiz, widget.inputValue, widget.correctedResponse, width, height);
               }
             )
           )
@@ -82,7 +86,7 @@ class _ShowResult extends State<ShowResult>{
   }
 
   //첫번째 화면
-  Widget checkText1(String inputValue, Quiz quiz, double width, double height){  
+  Widget checkText1(Quiz quiz, String inputValue, String correctedResponse, double width, double height){  
       return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -113,8 +117,10 @@ class _ShowResult extends State<ShowResult>{
 
             // 자신의 답변 출력 
             Container(
+
               width: width * 0.75,
               height: height * 0.18,
+              
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
                 borderRadius: BorderRadius.circular(10),
@@ -128,15 +134,28 @@ class _ShowResult extends State<ShowResult>{
                   ),
                 ],
               ),
+              
               padding: EdgeInsets.only(top: width * 0.012),
 
-              child: AutoSizeText ( 
-                ' $inputValue',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: width * 0.03,
+              child: GestureDetector(
+                onLongPress: () {
+                  Clipboard.setData(ClipboardData(text: inputValue));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('텍스트가 복사되었습니다.'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              
+                child: AutoSizeText(
+                  inputValue,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: width * 0.03,
+                  ),
                 ),
-                )
+              ),
             ),
 
             SizedBox(height: 20),
@@ -162,8 +181,7 @@ class _ShowResult extends State<ShowResult>{
               padding: EdgeInsets.only(top: width * 0.012),
               child: AutoSizeText ( 
                 //'수정된 답변이 들어가야함',
-                //' $inputValue',
-                ' ',
+                ' $correctedResponse',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: width * 0.03,
@@ -192,7 +210,7 @@ class _ShowResult extends State<ShowResult>{
       );
   }
   //두번째 화면
-  Widget checkText2(String inputValue, Quiz quiz, double width, double height){
+  Widget checkText2(Quiz quiz, String inputValue, String correctedAnswer, double width, double height){
       
       return Container(
         decoration: BoxDecoration(
@@ -209,7 +227,9 @@ class _ShowResult extends State<ShowResult>{
             Container(
               padding: EdgeInsets.fromLTRB(0, width * 0.024, 0, width * 0.024),
               child: ElevatedButton.icon(
-                onPressed: () {},  
+                onPressed: () {
+                
+                },  
                 icon: Icon(Icons.spellcheck, color: Colors.black), 
                 label: Text("결과 확인하기", style: TextStyle(fontWeight: FontWeight.bold),),
                 style: ElevatedButton.styleFrom(

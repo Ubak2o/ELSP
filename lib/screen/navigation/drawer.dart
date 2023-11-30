@@ -1,4 +1,3 @@
-import 'package:capstone/screen/auth/sign_in.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/features/myhome.dart';
 import 'package:capstone/screen/features/survey_topic_select.dart';
@@ -25,17 +24,21 @@ class MyDrawerState extends State<MyDrawer> {
   @override
   void initState() {
     super.initState();
-    loadUserInfo();
+    loadStatus();
   }
 
-  Future<void> loadUserInfo() async {
-    // await를 사용하여 비동기 함수 기다리기
-    await authManager.loadUserInfo(); 
-    // setState 메서드를 사용해서 loadUserInfo 함수가 완료된 후에 build 메서드에서 UI를 업데이트
+  Future<void> loadStatus() async {
+    if(await authManager.loadUserInfo() == 401){
+      logoutAndNavigateToLoginPage();
+    }
     setState(() {
       userName = authManager.fetchedUserName;
       userEmail = authManager.fetchedUserEmail;
     });
+  }
+
+  void logoutAndNavigateToLoginPage() {
+    authManager.showAuthDialog(context,"세션 만료", "로그인 세션이 만료되었습니다. 다시 로그인 해주세요.");
   }
 
   @override
@@ -114,53 +117,8 @@ class MyDrawerState extends State<MyDrawer> {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text("알림"),
-                              content: Text("정말로 탈퇴하시겠습니까?"),
-                              
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    
-                                    authManager.deleteUser(context).then((int statusCode) {
-                                      Navigator.push(context, MaterialPageRoute(builder: (c){
-                                        return LoginPage();
-                                      }));
-
-                                      // Check the status code and show another dialog if it's 204
-                                      if (statusCode == 204) {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text("탈퇴 완료"),
-                                              content: Text("탈퇴가 성공적으로 완료되었습니다."),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                  Navigator.of(context).pop(); // Close the success dialog
-                                                },
-                                                child: Text("확인"),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      }
-                                    }
-                                  );},
-                                  
-                                  child: Text("확인"),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-
+                      onPressed: (){
+                        authManager.deleteUser(context);
                       },
                       icon: Icon(Icons.delete_outline),
                       tooltip: '탈퇴',

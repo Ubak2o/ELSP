@@ -195,42 +195,15 @@ class _SignupPage extends State<SignupPage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: ()async {
-
-                                // 비밀번호가 일치하지 않을 때, 경고 창 띄우기
-                                if (passwordController.text != confirmPasswordController.text) {
-                                  showFailDialog("비밀번호가 일치하지 않습니다.");
-                                }else{
-
-                                  final Map<String, dynamic> userData = {
-                                    'username': nameController.text,
-                                    'email': emailController.text,
-                                    'password': passwordController.text,
-                                  };
-
-                                  authManager.register(userData).then((result) {
-
-                                    print(result);
-                                    
-                                    // 결과를 사용하는 코드
-                                    if(result.isEmpty){
-                                      showSuccessDialog();
-                                    }else{
-                                      List<dynamic>? usernameErrors = result['username'];
-                                      List<dynamic>? emailErrors = result['email'];
-                                      
-                                      if(usernameErrors != null && emailErrors == null){
-                                        //print(usernameErrors.toString());
-                                        showFailDialog('이미 사용 중인 사용자명입니다.');
-                                      }else if(usernameErrors == null && emailErrors != null){
-                                         //print(emailErrors.toString());
-                                         showFailDialog('이메일 형식이 옳바르지 않습니다.');
-                                      }else{
-                                        //print("both");
-                                        showFailDialog('이미 사용중인 사용자명입니다. 이메일 형식이 옳바르지 않습니다');          
-                                      }
-                                    }
-                                  });
-                                }
+                                
+                                List<String> userData = [nameController.text, emailController.text, passwordController.text, confirmPasswordController.text];
+                                authManager.register(context, userData);
+                                
+                                nameController.clear();
+                                emailController.clear();
+                                passwordController.clear();
+                                confirmPasswordController.clear();
+                                
                               },
 
                               style: ElevatedButton.styleFrom(
@@ -288,55 +261,5 @@ class _SignupPage extends State<SignupPage> {
         ),
       ),
     );
-  }
-
-    void showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('회원가입 성공'),
-          content: Text('회원가입이 성공적으로 완료되었습니다.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                nameController.clear();
-                emailController.clear();
-                passwordController.clear();
-                confirmPasswordController.clear();
-                Navigator.push(context, MaterialPageRoute(builder: (c) {
-                  return LoginPage();
-                }));
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showFailDialog(String text) {
-    showDialog(
-       context: context,
-       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('회원가입 실패'),
-          content: Text(text),
-          actions: [
-            TextButton(
-              onPressed: () {
-                nameController.clear();
-                emailController.clear();
-                passwordController.clear();
-                confirmPasswordController.clear();
-                Navigator.of(context).pop();
-              },
-              child: Text('확인'),
-            ),
-          ],
-        );
-      },
-    ) ;
   }
 }

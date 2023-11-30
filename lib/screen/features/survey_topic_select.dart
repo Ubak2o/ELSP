@@ -59,9 +59,9 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
     });
 
     //print("in loadUserStatus [surveyAllTopics] : $userToken");
-    print("in loadUserStatus [surveyAllTopics] : $surveyAllTopics");
+    //print("in loadUserStatus [surveyAllTopics] : $surveyAllTopics");
     print("in loadUserStatus [surveyUserTopics] : $surveyUserTopics");
-    print("in loadUserStatus [checkboxStates] : $checkboxStates");
+    //print("in loadUserStatus [checkboxStates] : $checkboxStates");
 
   }
 
@@ -158,11 +158,16 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
 
     if (index < surveyAllTopics.length && index < checkboxStates.length) {
       return CheckboxListTile(
-        title: Text(surveyAllTopics[index]),
+
+        dense: true, // Reduces the height of the ListTile
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.0),
+
+        title: AutoSizeText(surveyAllTopics[index]),
         value: checkboxStates[index],
         onChanged: (bool? value) {
           setStatus(List.from(checkboxStates)..[index] = value!);
         },
+        
       );
     }else {
       // 유효하지 않은 인덱스에 대한 처리 추가 (예: 에러 메시지 출력 또는 빈 컨테이너 반환)
@@ -186,7 +191,7 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
             child: ElevatedButton.icon(
               onPressed: () {},
               icon: Icon(Icons.task_alt, color: Colors.black),
-              label: AutoSizeText("연습하고 싶은 주제를 선택해주세요", style: TextStyle(fontWeight: FontWeight.bold)),
+              label: AutoSizeText("선택질문 주제 선택", style: TextStyle(fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(width * 0.75, height * 0.06),
                 foregroundColor: Colors.black,
