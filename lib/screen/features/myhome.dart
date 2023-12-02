@@ -91,6 +91,8 @@ class _UserRecord extends State<UserRecord>{
       userToken = authManager.fetchedUserToken;
       userName = authManager.fetchedUserName;
     });
+
+    print(userName);
   }
 
   void logoutAndNavigateToLoginPage() {
