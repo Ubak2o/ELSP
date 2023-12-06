@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:capstone/screen/features/myhome.dart';
 import 'package:capstone/screen/features/survey_topic_select.dart';
 import 'package:capstone/screen/features/impromptu_topic_select.dart';
-import 'package:capstone/func/auth_manager.dart';
+import 'package:capstone/functions/auth_manager.dart';
 
 /*
 * 파일: bottom.dart

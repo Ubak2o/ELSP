@@ -1,4 +1,4 @@
-import 'package:capstone/func/auth_manager.dart';
+import 'package:capstone/functions/auth_manager.dart';
 import 'package:capstone/screen/auth/reset_password.dart';
 import 'package:capstone/screen/auth/sign_up.dart';
 import 'package:flutter/material.dart';

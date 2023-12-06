@@ -155,7 +155,7 @@ class AuthManager{
 
   //로그인
   Future<void> loginUser(BuildContext context, String name, String passwd) async{
-    
+  
     if (name.isEmpty || passwd.isEmpty) {
       showAuthDialog(context, "로그인 실패", "이름과 비밀번호를 입력해주세요.");
     }
@@ -172,7 +172,7 @@ class AuthManager{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(userData),
-    ).then((http.Response response) {  
+    ).then((http.Response response) {
       // 로그인 성공
       if (response.statusCode == 200) {
         print('Login successful');
@@ -187,7 +187,7 @@ class AuthManager{
         // 로그인 실패
         print('Failed to login. Status code: ${response.statusCode}');
       }
-    }); 
+    });
   }
 
   //알림창

@@ -1,4 +1,4 @@
-import 'package:capstone/func/auth_manager.dart';
+import 'package:capstone/functions/auth_manager.dart';
 import 'package:capstone/screen/auth/sign_in.dart';
 import 'package:flutter/material.dart';
 

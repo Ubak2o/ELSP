@@ -11,47 +11,46 @@ import 'dart:convert';
 * 설명: 사용자 답변을 받아 결과를 처리하는 부분
 */
 
-
 class ResultManager{
 
   final Quiz quiz;
-  final String inputValue;
-  String correctedResponse = '';
+  final String userResponse;
+  final double accuracy;  //발음 신뢰도
+  final String recordingTime; // 녹음 시간
+  double similarity;  //유사도
+
   String address = "http://172.20.10.2:8000";
 
   // 생성자에서 매개변수를 받아 클래스 필드에 저장
-  ResultManager({ required this.quiz, required this.inputValue});
+  ResultManager({ required this.quiz, required this.userResponse , required this.accuracy, required this.recordingTime, this.similarity = 0});
 
-  Future<void> sendRequest(BuildContext context) async {
-
-    Map<String, dynamic> responseBodyMap =  {};
-    
-    http.post(
-      Uri.parse('$address/quiz/corrected-response/'),
+  Future<void> getSimilarity(BuildContext context) async {
+    //print(quiz.question);
+    var response = await http.post(
+      Uri.parse('$address/quiz/get-similarity/'),
       body: {
         'question' : quiz.question,
-        'user_response': inputValue,
+        'user_response': userResponse,
       },
-    ).then((http.Response response) {
-      
-      if (response.statusCode == 200) {
-        responseBodyMap = json.decode(response.body);
+    );
 
-        String correctedResponse = responseBodyMap['corrected_response'];
-        double similarity = responseBodyMap['similarity'];
-
-        print(correctedResponse);
-        print(similarity);
-
-        Future.microtask(() {
+    if (response.statusCode == 200) {
+      var responseData = json.decode(response.body);
+      similarity = responseData['similarity'];
+      Future.microtask(() {
           Navigator.push(context, MaterialPageRoute(builder: (c) {
-            return ShowResult(quiz, inputValue, correctedResponse, similarity);
+            return ShowResult(ResultManager(
+              quiz: quiz,
+              userResponse: userResponse,
+              accuracy: accuracy,
+              recordingTime: recordingTime,
+              similarity: similarity
+            ));
           }));
         });
-      } else if(response.statusCode == 400){
-        inputErrorDialog(context);  
-      }
-    });
+    } else{
+      print('fail to get similarity');
+    }
   }
 
   void inputErrorDialog(BuildContext context) {

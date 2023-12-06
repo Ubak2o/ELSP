@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:capstone/screen/navigation/drawer.dart';
 import 'package:capstone/screen/features/myhome.dart';
 import 'package:flutter_swiper_null_safety_flutter3/flutter_swiper_null_safety_flutter3.dart';
-import 'package:capstone/func/auth_manager.dart';
-import 'package:capstone/func/impromptu_topic_manager.dart';
+import 'package:capstone/functions/auth_manager.dart';
+import 'package:capstone/functions/impromptu_topic_manager.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
 
