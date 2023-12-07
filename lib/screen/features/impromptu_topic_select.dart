@@ -7,7 +7,7 @@ import 'package:capstone/functions/auth_manager.dart';
 import 'package:capstone/functions/impromptu_topic_manager.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
-
+import 'package:capstone/screen/features/list_page.dart';
 
 /*
 * 파일: impromptu_topic_select.dart
@@ -146,7 +146,7 @@ class _ImpromptuTopicSelect extends State<ImpromptuTopicSelect> {
         if (index == 0) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
         } else if (index == 1) {
-          print('Record');
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyListPage()));
         }
       }),
     );

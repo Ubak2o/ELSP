@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:capstone/model/api_adapter.dart';
+import 'package:capstone/screen/features/list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart' ;
 import 'package:capstone/model/model_quiz.dart';
@@ -51,7 +52,7 @@ class _MyHome extends State<MyHome>{
         if (index == 0) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
         } else if (index == 1) {
-          print('Record');
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyListPage()));
         }
       }),
     );
@@ -80,7 +81,6 @@ class _UserRecord extends State<UserRecord>{
   }
 
   Future<void> loadStatus() async {
-
     if(await authManager.loadToken() == null || await authManager.loadUserInfo() == 401){
       logoutAndNavigateToLoginPage();
     }
@@ -88,12 +88,7 @@ class _UserRecord extends State<UserRecord>{
       userToken = authManager.fetchedUserToken;
       userName = authManager.fetchedUserName;
     });
-
     //print(userName);
-  }
-
-  void logoutAndNavigateToLoginPage() {
-    authManager.showAuthDialog(context,"세션 만료", "세션이 만료되었습니다. 다시 로그인해 주세요.");
   }
 
   //TTS
@@ -415,14 +410,13 @@ Future<void> sendAudioToServer(String filePath, Uint8List content) async {
         double accuracy = responseBodyMap['accuracy'];
         String recordingTime = responseBodyMap['recording_time'];
 
-        print('transcripts : $transcript, accuracy: $accuracy, recordingTime: $recordingTime');
+        print('transcripts : $transcript');
+        print('accuracy: $accuracy');
+        print('recordingTime: $recordingTime');
         
-        ResultManager resultManager = ResultManager(quiz: quiz, userResponse: transcript, accuracy: accuracy, recordingTime: recordingTime);
-        if(quiz.question == ''){
-          resultManager.inputErrorDialog(context);
-        }else{
-          resultManager.getSimilarity(context);
-        }
+        ResultManager resultManager = ResultManager(authManager: authManager , quiz: quiz, userResponse: transcript, accuracy: accuracy, recordingTime: recordingTime);
+        resultManager.getSimilarity(context);
+
       } else {
         //응답을 받지 못했다면 
         print('Failed to send audio. Status code: ${response.statusCode}');
@@ -434,7 +428,11 @@ Future<void> sendAudioToServer(String filePath, Uint8List content) async {
 }
 
 //선택된 주제가 없을 경우 경고 알림창
-void noSelectedTopicDialog() {
+  void noSelectedTopicDialog() {
     authManager.showAuthDialog(context, "경고", "선택된 주제가 없습니다");
+  }
+
+  void logoutAndNavigateToLoginPage() {
+    authManager.showAuthDialog(context,"세션 만료", "세션이 만료되었습니다. 다시 로그인해 주세요.");
   }
 }

@@ -7,6 +7,7 @@ import 'package:capstone/functions/auth_manager.dart';
 import 'package:capstone/functions/survey_topic_manager.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
+import 'package:capstone/screen/features/list_page.dart';
 
 /*
 * 파일: survey.dart
@@ -145,7 +146,7 @@ class _SurveyTopicSelect extends State<SurveyTopicSelect> {
         if (index == 0) {
           Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
         } else if (index == 1) {
-          print('Record');
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyListPage()));
         }
       }),
     );

@@ -1,7 +1,6 @@
 import 'package:capstone/functions/result_manager.dart';
 import 'package:flutter_swiper_null_safety_flutter3/flutter_swiper_null_safety_flutter3.dart';
 import 'package:capstone/screen/features/myhome.dart';
-import 'package:capstone/model/model_quiz.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
@@ -9,7 +8,10 @@ import 'package:capstone/screen/navigation/bottom.dart';
 import 'package:vertical_barchart/vertical-barchart.dart';
 import 'package:vertical_barchart/vertical-barchartmodel.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; 
+import 'dart:convert';
+import 'package:capstone/model/model_result.dart';
+import 'package:intl/intl.dart';
+import 'package:capstone/screen/features/list_page.dart';
 
 class ShowResult extends StatefulWidget{
 
@@ -22,9 +24,8 @@ class ShowResult extends StatefulWidget{
 
 class _ShowResult extends State<ShowResult>{
 
-  int currentIndex = 0;
   String userModifiedAnswer = "";
-  String correctedResponse = "잠시만 기다려주세요...";
+  String correctedResponse = "";
   SwiperController controller = SwiperController();
   String address = "http://172.20.10.2:8000";
   
@@ -70,7 +71,7 @@ class _ShowResult extends State<ShowResult>{
                 if(index == 0){
                   return checkText1(textController, widget.resultManager, width, height);
                 }else {
-                  return checkText2(widget.resultManager.quiz, userModifiedAnswer, correctedResponse, width, height);
+                  return checkText2(widget.resultManager, userModifiedAnswer, correctedResponse, width, height);
                 }
               }
             )
@@ -82,7 +83,7 @@ class _ShowResult extends State<ShowResult>{
           if (index == 0) {
             Navigator.push(context, MaterialPageRoute(builder: (context) => MyHome()));
           } else if (index == 1) {
-            print('Record');
+            Navigator.push(context, MaterialPageRoute(builder: (context) => MyListPage()));
           }
         }),
       )
@@ -224,7 +225,7 @@ class _ShowResult extends State<ShowResult>{
   }
 
   //두번째 화면
-  Widget checkText2(Quiz quiz, String userModifiedAnswer, String correctedResponse, double width, double height){  
+  Widget checkText2(ResultManager resultManager, String userModifiedAnswer, String correctedResponse, double width, double height){  
     return SingleChildScrollView(
       
       child : Container(
@@ -256,7 +257,7 @@ class _ShowResult extends State<ShowResult>{
             // 자신의 답변 출력 
             Container(
               width: width * 0.75,
-              height: height * 0.225,
+              height: height * 0.18,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
                 borderRadius: BorderRadius.circular(10),
@@ -283,12 +284,11 @@ class _ShowResult extends State<ShowResult>{
               ),
             )),
 
-            SizedBox(height: 5),
+            SizedBox(height: 11),
             // 교정된 답변 출력
-            SingleChildScrollView(
-            child : Container(
+            Container(
               width: width * 0.75,
-              height: height * 0.225,
+              height: height * 0.18,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white, width: 1.5),
                 borderRadius: BorderRadius.circular(10),
@@ -301,22 +301,52 @@ class _ShowResult extends State<ShowResult>{
                     offset: Offset(0, 1), // changes position of shadow
                   ),
                 ],
-                
               ),
+              
               padding: EdgeInsets.only(top: width * 0.012),
+              
               child: SingleChildScrollView(
-                 child : AutoSizeText(
-                   correctedResponse,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: width * 0.03,
-                  ),
-                )
-              ) 
+                child : AutoSizeText(
+                correctedResponse,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: width * 0.03,
+                ),
+              ),
             )),
 
-            //버튼
-             ButtonBar(
+            Align(
+              alignment: Alignment.bottomRight,
+              child:  IconButton(
+                
+                onPressed: () {
+                  // 아이콘 버튼이 눌렸을 때 수행할 동작을 여기에 추가하세요.
+                  print('아이콘 버튼이 눌렸습니다!');
+                },
+                icon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.thumb_up_alt,
+                      size: 15,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(width: 5), // Adjust the spacing between the icon and text
+                    Text(
+                      "답변에 만족합니다!",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(width: 15),
+                  ],
+                ),
+              ),
+            ),
+            
+            ButtonBar(
               alignment: MainAxisAlignment.center, // 가로로 중앙 정렬
               children: <Widget>[
                 ElevatedButton(
@@ -329,7 +359,31 @@ class _ShowResult extends State<ShowResult>{
                 ),
           
                 ElevatedButton(
-                  onPressed: () { },
+                  onPressed: ()  async {
+
+                    DateTime date = DateTime.now();
+                    String currentDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
+
+                    
+                    Result result = Result(
+                      user: resultManager.authManager.fetchedUserName, 
+                      question: resultManager.quiz.question,
+                      topic: resultManager.quiz.topic,
+                      userResponse: userModifiedAnswer, 
+                      correctedResponse: correctedResponse, 
+                      recordingTime: resultManager.recordingTime, 
+                      accuracy: resultManager.accuracy, 
+                      similarity: resultManager.similarity, 
+                      currentDate: currentDate,  
+                    );
+
+                    try{
+                      await resultManager.saveResult(context, result);
+                    }catch(e){
+                      print('Error saving result: $e');
+                    }
+                    
+                  },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),
                     minimumSize: MaterialStateProperty.all(Size(width * 0.01, height * 0.05)),  
@@ -357,7 +411,6 @@ class _ShowResult extends State<ShowResult>{
     );
   }
 
-  //두번째 화면
   Widget buildGrafik(List<VBarChartModel> bardata) {
     return Column(
         children: [
