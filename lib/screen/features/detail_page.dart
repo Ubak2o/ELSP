@@ -4,6 +4,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone/screen/navigation/appbar.dart';
 import 'package:capstone/screen/navigation/bottom.dart';
+import 'package:capstone/functions/list_page_manager.dart';
 import 'package:vertical_barchart/vertical-barchart.dart';
 import 'package:vertical_barchart/vertical-barchartmodel.dart';
 import 'package:capstone/model/model_result.dart';
@@ -12,7 +13,9 @@ import 'package:capstone/screen/features/list_page.dart';
 class DetailScreen extends StatefulWidget{
 
   final Result result;
-  DetailScreen({required this.result});
+  final String userName;
+  final String userToken;
+  DetailScreen({required this.result, required this.userName, required this.userToken});
  
   @override
   State<DetailScreen> createState() =>  _DetailScreen();
@@ -20,6 +23,7 @@ class DetailScreen extends StatefulWidget{
 
 class _DetailScreen extends State<DetailScreen>{
 
+  ListManager listManager = ListManager();
   SwiperController controller = SwiperController();
   
    @override
@@ -320,8 +324,9 @@ class _DetailScreen extends State<DetailScreen>{
               children: <Widget>[
 
               ElevatedButton(
-                onPressed: () {
-                 
+                onPressed: () async{
+                  print('dd');
+                  await listManager.deleteUserItem(context, widget.userName, widget.userToken, result.currentDate);
                 },
                 style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),
@@ -332,7 +337,7 @@ class _DetailScreen extends State<DetailScreen>{
 
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (c) {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) {
                     return MyListPage();
                   }));
                 },

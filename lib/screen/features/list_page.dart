@@ -184,7 +184,7 @@ class MyListPageState extends State<MyListPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => DetailScreen(result: result),
+                          builder: (context) => DetailScreen(result: result, userName: userName, userToken: userToken,),
                         ),
                       );
                     },

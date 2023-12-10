@@ -28,6 +28,7 @@ class _ShowResult extends State<ShowResult>{
   String correctedResponse = "";
   SwiperController controller = SwiperController();
   String address = "http://172.20.10.2:8000";
+  bool feedbackPressed = false;
   
     
   @override
@@ -318,10 +319,14 @@ class _ShowResult extends State<ShowResult>{
             Align(
               alignment: Alignment.bottomRight,
               child:  IconButton(
-                
-                onPressed: () {
-                  // 아이콘 버튼이 눌렸을 때 수행할 동작을 여기에 추가하세요.
-                  print('아이콘 버튼이 눌렸습니다!');
+                onPressed: () async{
+                  print(feedbackPressed);
+                  if(!feedbackPressed){
+                    int status = await resultManager.getUserFeedback(context, userModifiedAnswer, correctedResponse);
+                    if (status == 201){
+                      feedbackPressed = true;
+                    }                  
+                  }
                 },
                 icon: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -363,8 +368,7 @@ class _ShowResult extends State<ShowResult>{
 
                     DateTime date = DateTime.now();
                     String currentDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(date);
-
-                    
+     
                     Result result = Result(
                       user: resultManager.authManager.fetchedUserName, 
                       question: resultManager.quiz.question,
@@ -382,7 +386,6 @@ class _ShowResult extends State<ShowResult>{
                     }catch(e){
                       print('Error saving result: $e');
                     }
-                    
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 248, 224, 224)),

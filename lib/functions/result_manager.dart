@@ -73,14 +73,43 @@ class ResultManager{
       body: jsonEncode(result.toJson()),
     ).then((http.Response response){
       if (response.statusCode == 201) {
-      print('저장되었습니다.');
-      showResultDialog(context, '성공', '성공적으로 저장되었습니다.');
-    } else {
-      print('Server Response: ${response.body}');
-      showResultDialog(context, '실패', '저장에 실패하였습니다.');
+        print('저장되었습니다');
+        showResultDialog(context, '저장 성공', '성공적으로 저장되었습니다.');
+      } else {
+        print('Server Response: ${response.body}');
+        showResultDialog(context, '저장 실패', '저장에 실패하였습니다.');
     }
 
     });
+  }
+
+  Future<int> getUserFeedback(BuildContext context, String userAnswer, String correctedAnswer) async {
+    
+    int status = 0;
+
+    final Map<String, dynamic> data = {
+      'user_answer': userAnswer,
+      'corrected_answer': correctedAnswer
+    };
+
+    await http.post(
+      Uri.parse('$address/quiz/feedback/'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(data)
+    ).then((http.Response response){
+      status = response.statusCode;
+      if (response.statusCode == 201) {
+        print('저장되었습니다');
+        showResultDialog(context, '피드백 성공', '피드백이 성공적으로 전송되었습니다.');
+        
+      }else {
+        print('Failed to load items. Status code: ${response.body}');
+        showResultDialog(context, '피드백 실패', '피드백 전송에 실패하였습니다.');
+      }
+    });
+    return status;
   }
   
   void showResultDialog(BuildContext context, String titleText, String contentText) {
@@ -93,9 +122,13 @@ class ResultManager{
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (c) {
-                  return MyHome();
-                }));
+                if(titleText == '저장 성공'){
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) {
+                    return MyHome();
+                  }));
+                }else{
+                  Navigator.of(context).pop();
+                }
               },
               child: Text('확인'),
             ),
